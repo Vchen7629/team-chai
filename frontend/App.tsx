@@ -5,6 +5,7 @@ import LoginScreen from './screens/login';
 import UserFeedScreen from './screens/userFeed';
 import UserProfileScreen from './screens/userProfile';
 import UserSignUpScreen from './screens/userSignUp';
+import "./global.css";
 
 export type RootStackParamList = {
   Home: undefined;
