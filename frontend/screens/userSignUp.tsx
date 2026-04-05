@@ -1,5 +1,4 @@
 import { Button, Text, View } from "react-native"
-import { pageBodyStyle } from "../styles/page"
 import { useNavigation } from "@react-navigation/native"
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
@@ -11,7 +10,7 @@ const UserSignUpScreen = () => {
     const navigation = useNavigation<NavProp>();
 
     return (
-        <View style={pageBodyStyle.container}>
+        <View className="flex flex-col w-full h-full items-center justify-center">
             <Text>Hello this is User Signup screen</Text>
             <Button title="Go back to Home Screen" onPress={() => navigation.navigate('Home', undefined)}/>
         </View>
