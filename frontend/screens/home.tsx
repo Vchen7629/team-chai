@@ -1,8 +1,22 @@
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Button, Text, View } from "react-native"
+import { RootStackParamList } from "../App";
+import { pageBodyStyle } from "../styles/page";
+
+type NavProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
 const HomeScreen = () => {
+    const navigation = useNavigation<NavProp>();
 
     return (
-        <div>Hello this is homescreen</div>
+        <View style={pageBodyStyle.container}>
+            <Text>Hello this is home screen</Text>
+            <Button title="Login Screen" onPress={() => navigation.navigate('Login', undefined)}/>
+            <Button title="User Feed Screen" onPress={() => navigation.navigate('UserFeed', { userId: '123' })}/>
+            <Button title="Profile Screen" onPress={() => navigation.navigate('UserProfile', { userId: '123' })}/>
+            <Button title="Sign Up Screen" onPress={() => navigation.navigate('UserSignUp', undefined)}/>
+        </View>
     )
 }
 
