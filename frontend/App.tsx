@@ -10,8 +10,8 @@ import "./global.css";
 export type RootStackParamList = {
   Home: undefined;
   Login: undefined;
-  UserFeed: { userId: string };
-  UserProfile: { userId: string };
+  UserFeed: undefined;
+  UserProfile: undefined;
   UserSignUp: undefined;
 }
 
