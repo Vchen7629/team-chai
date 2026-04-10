@@ -4,8 +4,9 @@ import { Pressable, Text, TextInput, View } from "react-native";
 import { RootStackParamList } from "../App";
 import { useNavigation } from "@react-navigation/native";
 import { User, Eye, EyeOff, Lock } from "lucide-react-native";
+import LoginButton from "../components/loginButton";
 
-type NavProp = NativeStackNavigationProp<RootStackParamList, "Login">;
+export type NavProp = NativeStackNavigationProp<RootStackParamList, "Login">;
 
 const LoginScreen = () => {
     const navigation = useNavigation<NavProp>();
@@ -67,14 +68,7 @@ const LoginScreen = () => {
                         </Pressable>
                     </View>
                 </View>
-
-                {/* Button to confirm login */}
-                <Pressable
-                    className="bg-blue-600 rounded-xl py-3.5 items-center active:opacity-80"
-                    onPress={() => navigation.navigate("Home", undefined)}
-                >
-                    <Text className="text-white font-semibold text-base">Sign in</Text>
-                </Pressable>
+                <LoginButton username={username} password={password}/>
             </View>
         </View>
     );
