@@ -130,14 +130,14 @@ const UserSignUpScreen = () => {
             <ScrollView showsVerticalScrollIndicator={false}>
                 <View className="p-8 pb-7">
                     
-                    // Header
-                    <Text className="text-2xl font-bold text-emerald-900">StepWise</Text>
+                    {/* Header */}
+                    <Text className="text-2xl font-bold text-emerald-900">HealthIQ</Text>
                     <Text className="text-sm text-gray-500 mt-1 mb-6">Create your account</Text>
 
-                    // Account Section
+                    {/* Account Section */}
                     <Text className="text-[10px] font-semibold text-emerald-700 tracking-wide uppercase border-b border-gray-200 pb-1 mt-5 mb-3.5">Account</Text>
 
-                    // Full Name
+                    {/* Full Name */}
                     <View className="mb-3">
                         <Text className="text-xs font-semibold text-gray-700 mb-1">Full name</Text>
                         <TextInput
@@ -152,7 +152,7 @@ const UserSignUpScreen = () => {
                         {errors.name && <Text className="text-[11px] text-red-600 mt-1">{errors.name}</Text>}
                     </View>
 
-                    // Email
+                    {/* Email */}
                     <View className="mb-3">
                         <Text className="text-xs font-semibold text-gray-700 mb-1">Email</Text>
                         <TextInput
@@ -169,7 +169,7 @@ const UserSignUpScreen = () => {
                         {errors.email && <Text className="text-[11px] text-red-600 mt-1">{errors.email}</Text>}
                     </View>
 
-                    // Email
+                    {/* Password */}
                     <View className="mb-3">
                         <Text className="text-xs font-semibold text-gray-700 mb-1">Password</Text>
                         <View className="flex-row items-center">
@@ -195,7 +195,7 @@ const UserSignUpScreen = () => {
                         {errors.password && <Text className="text-[11px] text-red-600 mt-1">{errors.password}</Text>}
                     </View>
 
-                    // Confirm Password
+                    {/* Confirm Password */}
                     <View className="mb-3">
                         <Text className="text-xs font-semibold text-gray-700 mb-1">Confirm password</Text>
                         <TextInput
@@ -211,10 +211,10 @@ const UserSignUpScreen = () => {
                         {errors.confirmPassword && <Text className="text-[11px] text-red-600 mt-1">{errors.confirmPassword}</Text>}
                     </View>
 
-                    // Health Profile Section
+                    {/* Health Profile Section */}
                     <Text className="text-[10px] font-semibold text-emerald-700 tracking-wide uppercase border-b border-gray-200 pb-1 mt-5 mb-3.5">Health profile</Text>
 
-                    // Two Columns for Age and Weight
+                    {/* Two Columns for Age and Weight */}
                     <View className="flex-row gap-2.5 mb-3">
                         <View className="flex-1">
                             <Text className="text-xs font-semibold text-gray-700 mb-1">Age</Text>
@@ -246,7 +246,7 @@ const UserSignUpScreen = () => {
                         </View>
                     </View>
 
-                    // Height
+                    {/* Height */}
                     <View className="mb-3">
                         <Text className="text-xs font-semibold text-gray-700 mb-1">Height</Text>
                         <View className="flex-row items-center gap-1.5">
@@ -271,7 +271,7 @@ const UserSignUpScreen = () => {
                         </View>
                     </View>
 
-                    // Gender
+                    {/* Gender */}
                     <View className="mb-3">
                         <Text className="text-xs font-semibold text-gray-700 mb-1">Gender</Text>
                         <View className="flex-row flex-wrap gap-2">
@@ -298,7 +298,7 @@ const UserSignUpScreen = () => {
                         {errors.gender && <Text className="text-[11px] text-red-600 mt-1">{errors.gender}</Text>}
                     </View>
 
-                    // Activity Level
+                    {/* Activity Level */}
                     <View className="mb-3">
                         <Text className="text-xs font-semibold text-gray-700 mb-1">Activity level</Text>
                         <Text className="text-[11px] text-gray-400 mb-1">How active are you on a typical day?</Text>
@@ -326,7 +326,7 @@ const UserSignUpScreen = () => {
                         {errors.activity && <Text className="text-[11px] text-red-600 mt-1">{errors.activity}</Text>}
                     </View>
 
-                    // Daily Step Goal Section
+                    {/* Daily Step Goal Section */}
                     <Text className="text-[10px] font-semibold text-emerald-700 tracking-wide uppercase border-b border-gray-200 pb-1 mt-5 mb-3.5">Daily step goal</Text>
 
                     <View className="mb-3">
@@ -345,7 +345,7 @@ const UserSignUpScreen = () => {
                         {errors.steps && <Text className="text-[11px] text-red-600 mt-1">{errors.steps}</Text>}
                     </View>
 
-                    // Action Buttons
+                    {/* Action Buttons */}
                     <TouchableOpacity
                         className="bg-emerald-700 rounded-xl py-3.5 items-center mt-6"
                         onPress={handleSubmit}
