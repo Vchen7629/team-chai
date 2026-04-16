@@ -4,7 +4,7 @@ import * as SecureStore from 'expo-secure-store'
 const client = axios.create({
     // this is my own private network machine ip, prob need to change it for yours 
     // by typing in ipconfig.
-    baseURL: "http://10.0.0.7:8001"
+    baseURL: "http://10.0.0.229:8001"
 })
 
 // this is to attach the session token to every request for backend auth

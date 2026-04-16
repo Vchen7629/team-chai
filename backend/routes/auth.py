@@ -1,9 +1,11 @@
+from sqlalchemy.exc import IntegrityError
 from fastapi import status
 from fastapi import Depends
 from fastapi import APIRouter
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from .models import UserAuthRequest
+from .models import UserLoginRequest
+from .models import UserSignUpRequest
 from .models import UserLoginResponse
 from db.session_queries import create_new_user_session
 from db.user_account_queries import fetch_hashed_password
@@ -15,14 +17,8 @@ import bcrypt
 router = APIRouter(prefix="/auth")
 
 @router.post("/login", status_code=status.HTTP_200_OK)
-async def user_login(request: UserAuthRequest, db: AsyncSession = Depends(get_short_lived_session)) -> UserLoginResponse:
+async def user_login(request: UserLoginRequest, db: AsyncSession = Depends(get_short_lived_session)) -> UserLoginResponse:
     """Login endpoint, checks if username and password are correct and returns a session token for user specific use"""
-    if not request.username or not request.password:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="missing username or password in request"
-        )
-
     try:
         hashed_password = await fetch_hashed_password(db, request.username)
     except ValueError:
@@ -54,20 +50,14 @@ async def user_login(request: UserAuthRequest, db: AsyncSession = Depends(get_sh
     )
     
 @router.post("/signup", status_code=status.HTTP_201_CREATED)
-async def user_signup(request: UserAuthRequest, db: AsyncSession = Depends(get_short_lived_session)):
+async def user_signup(request: UserSignUpRequest, db: AsyncSession = Depends(get_short_lived_session)):
     """Signup endpoint, checks if the password for the username is correct and returns a success/error msg"""
-    if not request.username or not request.password:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="missing username or password in request"
-        )
-    
-    hash_password = bcrypt.hashpw(request.password.encode('utf-8'), bcrypt.gensalt())
-
     try:
-        await create_new_user_account(db, request.username, hash_password.decode('utf-8'))
+        await create_new_user_account(db, request)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    except IntegrityError:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="account already exists")
     except Exception:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

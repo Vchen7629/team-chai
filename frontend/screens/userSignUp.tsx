@@ -4,8 +4,9 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
 import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
+import SignUpButton from "../components/signupButton";
 
-type NavProp = NativeStackNavigationProp<RootStackParamList, 'UserSignUp'>;
+export type NavProp = NativeStackNavigationProp<RootStackParamList, 'UserSignUp'>;
 
 const UserSignUpScreen = () => {
     const navigation = useNavigation<NavProp>();
@@ -29,6 +30,7 @@ const UserSignUpScreen = () => {
     const [selectedActivity, setSelectedActivity] = useState<string>('');
     const [errors, setErrors] = useState<Record<string, string>>({});
 
+    console.log("idk", selectedActivity)
     // ===== SELECTION OPTIONS =====
     const genders: string[] = ['Male', 'Female', 'Other', 'Prefer not to say'];
     const activityLevels: string[] = ['Sedentary', 'Light', 'Moderate', 'Active', 'Very Active'];
@@ -112,15 +114,6 @@ const UserSignUpScreen = () => {
 
         setErrors(newErrors);
         return isValid;
-    };
-
-    // ===== FORM SUBMISSION =====
-    const handleSubmit = (): void => {
-        if (validateForm()) {
-            Alert.alert('Success!', `Account created! Welcome, ${formData.name}!`);
-            // Navigate to home or dashboard after successful signup
-            // navigation.navigate('Home', undefined);
-        }
     };
 
     const togglePasswordVisibility = (): void => setShowPassword(!showPassword);
@@ -346,12 +339,7 @@ const UserSignUpScreen = () => {
                     </View>
 
                     {/* Action Buttons */}
-                    <TouchableOpacity
-                        className="bg-emerald-700 rounded-xl py-3.5 items-center mt-6"
-                        onPress={handleSubmit}
-                    >
-                        <Text className="text-white text-base font-bold tracking-wide">Create account</Text>
-                    </TouchableOpacity>
+                    <SignUpButton validateForm={validateForm} formData={formData} selectedGender={selectedGender} selectedActivity={selectedActivity}/>
                     
                     <TouchableOpacity
                         className="py-2 items-center mt-3"
