@@ -8,29 +8,43 @@ import { useState } from "react";
 interface LoginButtonProps {
     username: string
     password: string
+    setErrors: (errors: { username: string; password: string; general: string }) => void
 }
 
-const LoginButton = ({ username, password }: LoginButtonProps) => {
+const LoginButton = ({ username, password, setErrors }: LoginButtonProps) => {
     const navigation = useNavigation<NavProp>();
     const [isLoading, setIsLoading] = useState<boolean>(false)
 
+    function validateInput(): boolean {
+        const newErrors = { username: "", password: "", general: "" }
+
+        if (!username.trim()) newErrors.username = "Username is required"
+        if (!password.trim()) newErrors.password = "Password is required"
+
+        if (newErrors.username || newErrors.password) {
+            setErrors(newErrors)
+            return false
+        }
+
+        return true
+    }
+
     async function handleLogin() {
         if (isLoading) return
+        if (!validateInput()) return
+
         setIsLoading(true)
 
         try {
             await AuthService.login(username, password)
             navigation.navigate("UserProfile", undefined)
-
-            // these are for debugging, can remove later
-            const token = await SecureStore.getItemAsync('session_token')
-            console.log('token in storage:', token)
         } catch (err: any) {
-            // these are for debugging, can remove later and update with actual error handling
-            console.log("status:", err.response?.status);
-            console.log("detail:", err.response?.data);
-            const msg = err.response?.data?.detail ?? "Something went wrong";
-            console.log(`error logging in ${msg}`)
+            const status = err.response?.status;
+            if (status === 401 || status === 404) {
+                setErrors({ username: "", password: "", general: "invalid username or password"});
+            } else {
+                setErrors({ username: "", password: "", general: "Something went wrong"});
+            }
         } finally {
             setIsLoading(false)
         }
