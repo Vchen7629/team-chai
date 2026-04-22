@@ -5,6 +5,7 @@ from fastapi.exceptions import RequestValidationError
 from core.lifespan import lifespan
 from core.settings import settings
 from routes.auth import router as auth_router
+from routes.steps import router as steps_router
 import uvicorn
 
 app = FastAPI(lifespan=lifespan)
@@ -20,6 +21,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     return JSONResponse(status_code=400, content={"detail": f"missing {field}"})
 
 app.include_router(auth_router)
+app.include_router(steps_router)
 
 if __name__ == "__main__":
     print(f"starting fastapi on http:localhost:{settings.FASTAPI_PORT}")
