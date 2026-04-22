@@ -1,10 +1,6 @@
-from pydantic import Field
+# shared pydantic type model classes
 from pydantic import BaseModel
 
-class UserLoginRequest(BaseModel):
-    username: str
-    password: str
-    
 class UserSignUpRequest(BaseModel):
     username: str
     email: str
@@ -16,7 +12,3 @@ class UserSignUpRequest(BaseModel):
     gender: str
     activityLevel: str
     targetsteps: int
-
-class UserLoginResponse(BaseModel):
-    message: str
-    session_token: str
