@@ -1,3 +1,4 @@
+from db.session_queries import fetch_username_with_session
 from datetime import date
 from fastapi import status
 from fastapi import Depends
@@ -16,21 +17,22 @@ router = APIRouter(prefix="/steps")
 
 
 class UserStepsRequest(BaseModel):
-    username: str
+    session_token: str
     steps: int
 
 
 @router.post(path="/new", status_code=status.HTTP_201_CREATED)
 async def new_user_steps(
-    request: UserStepsRequest, session: AsyncSession = Depends(get_short_lived_session)
+    request: UserStepsRequest,
+    db_session: AsyncSession = Depends(get_short_lived_session),
 ) -> dict[str, str]:
     """create new steps record for the user for the current day in the database"""
-    try:
-        await create_user_new_steps(session, request.username, request.steps)
+    username = await _get_authenticated_user(db_session, request.session_token)
 
-        return {
-            "message": f"created {request.steps} steps for {request.username} successfully!"
-        }
+    try:
+        await create_user_new_steps(db_session, username, request.steps)
+
+        return {"message": f"created {request.steps} steps successfully!"}
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except IntegrityError as e:
@@ -48,15 +50,16 @@ async def new_user_steps(
 
 @router.post(path="/add", status_code=status.HTTP_200_OK)
 async def add_user_steps(
-    request: UserStepsRequest, session: AsyncSession = Depends(get_short_lived_session)
+    request: UserStepsRequest,
+    db_session: AsyncSession = Depends(get_short_lived_session),
 ) -> dict[str, str]:
     """Add new steps to an existing user steps record for the current day in the database"""
-    try:
-        await update_user_steps(session, request.username, request.steps)
+    username = await _get_authenticated_user(db_session, request.session_token)
 
-        return {
-            "message": f"added {request.steps} steps for {request.username} successfully!"
-        }
+    try:
+        await update_user_steps(db_session, username, request.steps)
+
+        return {"message": f"added {request.steps} steps successfully!"}
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except IntegrityError as e:
@@ -73,18 +76,20 @@ async def add_user_steps(
 
 
 class FetchUserStepsRequest(BaseModel):
-    username: str
+    session_token: str
     date: date
 
 
 @router.post(path="/get", status_code=status.HTTP_200_OK)
 async def fetch_user_steps(
     request: FetchUserStepsRequest,
-    session: AsyncSession = Depends(get_short_lived_session),
+    db_session: AsyncSession = Depends(get_short_lived_session),
 ) -> int:
     """Fetch the number of steps for a user for the current date"""
+    username = await _get_authenticated_user(db_session, request.session_token)
+
     try:
-        steps = await fetch_curr_date_steps(session, request.username, request.date)
+        steps = await fetch_curr_date_steps(db_session, username, request.date)
 
         return steps
     except ValueError as e:
@@ -93,4 +98,16 @@ async def fetch_user_steps(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Server error fetching db",
+        )
+
+
+async def _get_authenticated_user(db_session: AsyncSession, session_token: str) -> str:
+    """Shared private function with username fetching + error handling"""
+    try:
+        return await fetch_username_with_session(db_session, session_token)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="server error"
         )
