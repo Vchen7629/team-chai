@@ -1,6 +1,6 @@
-from routes.models import UserSignUpRequest
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
+from routes.models import UserSignUpRequest
 import bcrypt
 
 async def fetch_hashed_password(session: AsyncSession, username: str) -> str:
