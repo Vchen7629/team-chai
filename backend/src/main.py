@@ -10,15 +10,13 @@ import uvicorn
 
 app = FastAPI(lifespan=lifespan)
 
-@app.get("/")
-async def hello_world() -> None:
-    return {"message": "hello worlddddd!"}
 
 @app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
+async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
     first_error = exc.errors()[0]
-    field = first_error['loc'][-1]
+    field = first_error["loc"][-1]
     return JSONResponse(status_code=400, content={"detail": f"missing {field}"})
+
 
 app.include_router(auth_router)
 app.include_router(steps_router)
