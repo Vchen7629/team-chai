@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 from fastapi import status
 from fastapi import Depends
 from fastapi import APIRouter
@@ -74,10 +74,10 @@ async def add_user_steps(
 
 class FetchUserStepsRequest(BaseModel):
     username: str
-    date: datetime
+    date: date
 
 
-@router.get(path="/get", status_code=status.HTTP_200_OK)
+@router.post(path="/get", status_code=status.HTTP_200_OK)
 async def fetch_user_steps(
     request: FetchUserStepsRequest,
     session: AsyncSession = Depends(get_short_lived_session),

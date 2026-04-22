@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -42,7 +42,7 @@ async def update_user_steps(session: AsyncSession, username: str, steps: int) ->
 
 
 async def fetch_curr_date_steps(
-    session: AsyncSession, username: str, date: datetime
+    session: AsyncSession, username: str, date: date
 ) -> int:
     """
     Fetch the current steps for the user for the current date, Used by the frontend to
