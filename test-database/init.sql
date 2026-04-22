@@ -20,3 +20,11 @@ CREATE TABLE IF NOT EXISTS user_profile (
     activitylevel TEXT NOT NULL,
     targetsteps INTEGER NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS user_daily_steps {
+    username  TEXT REFERENCES user_login(username),
+    steps     INTEGER DEFAULT 0,
+    curr_date DATE NOT NULL,
+
+    PRIMARY KEY (username, curr_date)
+}
