@@ -6,6 +6,7 @@ from contextlib import asynccontextmanager
 from db.connection import engine
 import os
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[Any, Any]:
     # checking database is reachable before proceeding
@@ -20,4 +21,3 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[Any, Any]:
     yield
 
     await engine.dispose()
-

@@ -2,11 +2,16 @@ from datetime import datetime
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-async def create_user_new_steps(session: AsyncSession, username: str, steps: int) -> None:
+
+async def create_user_new_steps(
+    session: AsyncSession, username: str, steps: int
+) -> None:
     """
     creates new steps for a user for a given date. used when the user first
     inputs their current steps
     """
+    if steps <= 0:
+        raise ValueError("steps must be positive")
 
     query = """
         INSERT INTO user_daily_steps (username, steps, curr_date) 
@@ -15,16 +20,16 @@ async def create_user_new_steps(session: AsyncSession, username: str, steps: int
             steps = EXCLUDED.steps;
     """
 
-    await session.execute(
-        text(query),
-        {"username": username.strip(), "steps": steps}
-    )
+    await session.execute(text(query), {"username": username.strip(), "steps": steps})
+
 
 async def update_user_steps(session: AsyncSession, username: str, steps: int) -> None:
     """
     Add new steps for a user for a given date. Used for the background step
     tracker to increase daily steps
     """
+    if steps <= 0:
+        raise ValueError("steps must be positive")
 
     query = """
         INSERT INTO user_daily_steps (username, steps, curr_date)
@@ -33,12 +38,12 @@ async def update_user_steps(session: AsyncSession, username: str, steps: int) ->
             steps = user_daily_steps.steps + EXCLUDED.steps;
     """
 
-    await session.execute(
-        text(query),
-        {"username": username, "steps": steps}
-    )
+    await session.execute(text(query), {"username": username, "steps": steps})
 
-async def fetch_curr_date_steps(session: AsyncSession, username: str, date: datetime) -> int:
+
+async def fetch_curr_date_steps(
+    session: AsyncSession, username: str, date: datetime
+) -> int:
     """
     Fetch the current steps for the user for the current date, Used by the frontend to
     display the steps for the current day like in the calendar component

@@ -1,6 +1,7 @@
 # shared pydantic type model classes
 from pydantic import BaseModel
 
+
 class UserSignUpRequest(BaseModel):
     username: str
     email: str
