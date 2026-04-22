@@ -1,12 +1,11 @@
-from sqlalchemy.exc import IntegrityError
+from routes.models import UserSignUpRequest
+from pydantic import BaseModel
 from fastapi import status
 from fastapi import Depends
 from fastapi import APIRouter
 from fastapi import HTTPException
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from .models import UserLoginRequest
-from .models import UserSignUpRequest
-from .models import UserLoginResponse
 from db.session_queries import create_new_user_session
 from db.user_account_queries import fetch_hashed_password
 from db.user_account_queries import create_new_user_account
@@ -15,6 +14,14 @@ import uuid
 import bcrypt
 
 router = APIRouter(prefix="/auth")
+
+class UserLoginRequest(BaseModel):
+    username: str
+    password: str
+
+class UserLoginResponse(BaseModel):
+    message: str
+    session_token: str
 
 @router.post("/login", status_code=status.HTTP_200_OK)
 async def user_login(request: UserLoginRequest, db: AsyncSession = Depends(get_short_lived_session)) -> UserLoginResponse:
