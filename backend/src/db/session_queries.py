@@ -30,3 +30,22 @@ async def create_new_user_session(
             "expire_at": expire_one_hour,
         },
     )
+
+
+async def fetch_username_with_session(
+    db_session: AsyncSession, session_token: str
+) -> str:
+    """Use the session token to fetch username for subsequent queries"""
+    query = """
+        SELECT username FROM user_sessions 
+        WHERE session_token = :session_token
+            AND expire_at >= NOW()
+    """
+
+    result = await db_session.execute(text(query), {"session_token": session_token})
+
+    row = result.fetchone()
+    if not row:
+        raise ValueError("Session doesnt exist or expired")
+
+    return row[0]
