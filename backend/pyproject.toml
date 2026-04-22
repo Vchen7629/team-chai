@@ -22,7 +22,7 @@ extraPaths = ["."]
 [tool.pyrefly]
 python-version = "3.13"
 untyped-def-behavior = "check-and-infer-return-any"
-search-path = [".", "../shared/python/src"]
+search-path = ["."]
 venv = ".venv"
 
 [tool.pyrefly.errors]
@@ -33,7 +33,7 @@ implicit-any = "error"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["."]
+pythonpath = [".", "src"]
 filterwarnings = [
     "ignore::DeprecationWarning:testcontainers",
 ]

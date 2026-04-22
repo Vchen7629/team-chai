@@ -51,11 +51,13 @@ async def fetch_curr_date_steps(
 
     query = """
         SELECT steps FROM user_daily_steps
-        WHERE username = :username
-            AND date = CURRENT_DATE;
+        WHERE LOWER(username) = LOWER(:username)
+            AND curr_date = CURRENT_DATE;
     """
 
-    result = await session.execute(text(query), {"username": username, "date": date})
+    result = await session.execute(
+        text(query), {"username": username.strip(), "date": date}
+    )
 
     row = result.fetchone()
     if not row:
