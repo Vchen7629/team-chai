@@ -18,7 +18,6 @@ CREATE TABLE IF NOT EXISTS user_profile (
     heightin INTEGER NOT NULL,
     gender   TEXT NOT NULL,
     activitylevel TEXT NOT NULL,
-    targetsteps INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS user_daily_steps (
