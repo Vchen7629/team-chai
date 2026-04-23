@@ -1,8 +1,8 @@
 from typing import Any
 from unittest.mock import MagicMock
 from unittest.mock import AsyncMock
-from db.user_account_queries import fetch_hashed_password
-from db.user_account_queries import create_new_user_account
+from db.auth_queries import fetch_hashed_password
+from db.auth_queries import create_new_user_account
 from routes.models import UserSignUpRequest
 import pytest
 

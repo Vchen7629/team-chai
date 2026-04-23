@@ -2,7 +2,7 @@ import pytest
 import bcrypt
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
-from db.user_account_queries import fetch_hashed_password, create_new_user_account
+from db.auth_queries import fetch_hashed_password, create_new_user_account
 from routes.models import UserSignUpRequest
 
 

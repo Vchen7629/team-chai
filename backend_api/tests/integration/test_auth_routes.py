@@ -2,7 +2,7 @@ from typing import Any
 from fastapi import FastAPI
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import AsyncSession
-from db.user_account_queries import create_new_user_account
+from db.auth_queries import create_new_user_account
 from routes.models import UserSignUpRequest
 import pytest
 

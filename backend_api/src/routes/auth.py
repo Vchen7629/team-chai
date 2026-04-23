@@ -8,8 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.logging import logger
 from routes.models import UserSignUpRequest
 from db.session_queries import create_new_user_session
-from db.user_account_queries import fetch_hashed_password
-from db.user_account_queries import create_new_user_account
+from db.auth_queries import fetch_hashed_password
+from db.auth_queries import create_new_user_account
 from db.connection import get_short_lived_session
 import uuid
 import bcrypt
