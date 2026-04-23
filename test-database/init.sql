@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS user_profile (
     heightin INTEGER NOT NULL,
     gender   TEXT NOT NULL,
     activitylevel TEXT NOT NULL,
+    avg_steps_7_days FLOAT NOT NULL DEFAULT 0.0,
+    goal_hit_rate FLOAT NOT NULL DEFAULT 0.0
 );
 
 CREATE TABLE IF NOT EXISTS user_daily_steps (
