@@ -1,22 +1,20 @@
-from routes.models import UserFitnessData
 from datetime import date
-from typing import Literal
 from fastapi import status
 from fastapi import Request
 from fastapi import Depends
 from fastapi import APIRouter
 from fastapi import HTTPException
-from pydantic import Field
 from pydantic import BaseModel
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.logging import logger
+from routes.models import UserFitnessData
 from db.connection import get_short_lived_session
 from db.steps_queries import update_user_steps
 from db.steps_queries import create_user_new_steps
 from db.steps_queries import fetch_curr_date_steps
-from ml_model.utils import target_steps_recommendation
 from db.session_queries import fetch_username_with_session
+from ml_model.utils import target_steps_recommendation
 
 
 router = APIRouter(prefix="/steps")
@@ -40,14 +38,17 @@ async def new_user_steps(
 
         return {"message": f"created {request.steps} steps successfully!"}
     except ValueError as e:
+        logger.error("error creating new steps for user", err=str(e))
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except IntegrityError as e:
         if "foreign key" in str(e.orig).lower():
+            logger.error("user not found to create steps for")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
             )
         raise
-    except Exception:
+    except Exception as e:
+        logger.error("unknown error creating new steps for user", err=str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Server error updating db",
@@ -67,14 +68,17 @@ async def add_user_steps(
 
         return {"message": f"added {request.steps} steps successfully!"}
     except ValueError as e:
+        logger.error("error updating user steps", err=str(e))
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except IntegrityError as e:
         if "foreign key" in str(e.orig).lower():
+            logger.error("user not found to create steps for")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
             )
         raise
-    except Exception:
+    except Exception as e:
+        logger.error("unknown error updating steps for user", err=str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Server error updating db",
@@ -99,8 +103,10 @@ async def fetch_user_steps(
 
         return steps
     except ValueError as e:
+        logger.error("error fetching user curr steps", err=str(e))
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    except Exception:
+    except Exception as e:
+        logger.error("unknown error fetching user curr steps", err=str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Server error fetching db",
@@ -112,8 +118,10 @@ async def _get_authenticated_user(db_session: AsyncSession, session_token: str) 
     try:
         return await fetch_username_with_session(db_session, session_token)
     except ValueError as e:
+        logger.error("Session doesnt exist or expired", err=str(e))
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
-    except Exception:
+    except Exception as e:
+        logger.error("unknown error fetching username with session", err=str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="server error"
         )
