@@ -7,6 +7,8 @@ requires-python = ">=3.13"
 dependencies = [
     "numpy>=2.4.4",
     "polars>=1.40.1",
+    "scikit-learn>=1.8.0",
+    "xgboost>=3.2.0",
 ]
 
 [tool.pyright]
@@ -15,3 +17,8 @@ venv = ".venv"
 pythonVersion = "3.13"
 include = ["dataset", "training", "validation"]
 extraPaths = ["."]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.11",
+]
