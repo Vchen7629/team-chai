@@ -17,7 +17,14 @@ async def validation_exception_handler(
 ) -> JSONResponse:
     first_error = exc.errors()[0]
     field = first_error["loc"][-1]
-    return JSONResponse(status_code=400, content={"detail": f"missing {field}"})
+    error_type = first_error["type"]
+
+    if error_type == "missing":
+        message = f"missing {field}"
+    else:
+        message = f"invalid value for {field}: {first_error['msg']}"
+
+    return JSONResponse(status_code=400, content={"detail": message})
 
 
 app.include_router(auth_router)
