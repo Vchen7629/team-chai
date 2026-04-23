@@ -28,6 +28,7 @@ MANIFEST
 frontend/android/
 .vscode
 ml_model/dataset_output
+docs/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
