@@ -3,7 +3,8 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     """Api settings/configs live here"""
-
+    LOG_LEVEL: str = "DEBUG"
+    LOG_FORMAT: str = "json"
     FASTAPI_PORT: int = 8001
 
     DB_HOST: str = "localhost"
