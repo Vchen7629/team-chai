@@ -9,11 +9,11 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.logging import logger
 from routes.models import UserFitnessData
+from routes.auth import get_authenticated_user
 from db.connection import get_short_lived_session
 from db.steps_queries import update_user_steps
 from db.steps_queries import create_user_new_steps
 from db.steps_queries import fetch_curr_date_steps
-from db.session_queries import fetch_username_with_session
 from ml_model.utils import target_steps_recommendation
 
 
@@ -31,7 +31,7 @@ async def new_user_steps(
     db_session: AsyncSession = Depends(get_short_lived_session),
 ) -> dict[str, str]:
     """create new steps record for the user for the current day in the database"""
-    username = await _get_authenticated_user(db_session, request.session_token)
+    username = await get_authenticated_user(db_session, request.session_token)
 
     try:
         await create_user_new_steps(db_session, username, request.steps)
@@ -61,7 +61,7 @@ async def add_user_steps(
     db_session: AsyncSession = Depends(get_short_lived_session),
 ) -> dict[str, str]:
     """Add new steps to an existing user steps record for the current day in the database"""
-    username = await _get_authenticated_user(db_session, request.session_token)
+    username = await get_authenticated_user(db_session, request.session_token)
 
     try:
         await update_user_steps(db_session, username, request.steps)
@@ -96,7 +96,7 @@ async def fetch_user_steps(
     db_session: AsyncSession = Depends(get_short_lived_session),
 ) -> int:
     """Fetch the number of steps for a user for the current date"""
-    username = await _get_authenticated_user(db_session, request.session_token)
+    username = await get_authenticated_user(db_session, request.session_token)
 
     try:
         steps = await fetch_curr_date_steps(db_session, username, request.date)
@@ -110,20 +110,6 @@ async def fetch_user_steps(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Server error fetching db",
-        )
-
-
-async def _get_authenticated_user(db_session: AsyncSession, session_token: str) -> str:
-    """Shared private function with username fetching + error handling"""
-    try:
-        return await fetch_username_with_session(db_session, session_token)
-    except ValueError as e:
-        logger.error("Session doesnt exist or expired", err=str(e))
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
-    except Exception as e:
-        logger.error("unknown error fetching username with session", err=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="server error"
         )
 
 

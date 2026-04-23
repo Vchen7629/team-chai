@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.logging import logger
 from routes.models import UserSignUpRequest
 from db.session_queries import create_new_user_session
+from db.session_queries import fetch_username_with_session
 from db.auth_queries import fetch_hashed_password
 from db.auth_queries import create_new_user_account
 from db.connection import get_short_lived_session
@@ -84,3 +85,17 @@ async def user_signup(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     return {"message": "successfully created new user!"}
+
+
+async def get_authenticated_user(db_session: AsyncSession, session_token: str) -> str:
+    """Shared private function with username fetching + error handling"""
+    try:
+        return await fetch_username_with_session(db_session, session_token)
+    except ValueError as e:
+        logger.error("Session doesnt exist or expired", err=str(e))
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
+    except Exception as e:
+        logger.error("unknown error fetching username with session", err=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="server error"
+        )
