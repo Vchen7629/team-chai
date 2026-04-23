@@ -3,6 +3,7 @@ from dataset.sample import rng
 from dataset.step_count import compute_avg_daily_steps
 from dataset.step_count import compute_demographic_step_goal
 from dataset.sample import sample_demographics
+import os
 import numpy as np
 import polars as pl
 
@@ -77,4 +78,6 @@ if __name__ == "__main__":
     df = generate_dataset()
     print(df.head())
     print(df.describe())
+
+    os.mkdir(os.path.dirname("dataset_output"), exist_ok=True)
     df.write_csv("dataset_output/data3.csv")
