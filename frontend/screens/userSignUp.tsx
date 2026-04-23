@@ -21,7 +21,6 @@ const UserSignUpScreen = () => {
         weight: '',
         heightFt: '',
         heightIn: '',
-        stepGoal: ''
     });
 
     // ===== UI STATE =====
@@ -103,12 +102,6 @@ const UserSignUpScreen = () => {
 
         if (!selectedActivity) {
             newErrors.activity = 'Please select an activity level';
-            isValid = false;
-        }
-
-        const steps: number = Number(formData.stepGoal);
-        if (!formData.stepGoal || steps < 1000 || steps > 100000) {
-            newErrors.steps = 'Enter a step goal between 1,000 and 100,000';
             isValid = false;
         }
 
@@ -317,25 +310,6 @@ const UserSignUpScreen = () => {
                             ))}
                         </View>
                         {errors.activity && <Text className="text-[11px] text-red-600 mt-1">{errors.activity}</Text>}
-                    </View>
-
-                    {/* Daily Step Goal Section */}
-                    <Text className="text-[10px] font-semibold text-emerald-700 tracking-wide uppercase border-b border-gray-200 pb-1 mt-5 mb-3.5">Daily step goal</Text>
-
-                    <View className="mb-3">
-                        <Text className="text-xs font-semibold text-gray-700 mb-1">Target steps</Text>
-                        <Text className="text-[11px] text-gray-400 mb-1">Set your daily step goal (1,000 - 100,000 steps)</Text>
-                        <TextInput
-                            className={`border rounded-lg p-2.5 text-sm text-gray-900 bg-white ${
-                                errors.steps ? 'border-red-500' : 'border-gray-300'
-                            }`}
-                            placeholder="Enter your daily step goal"
-                            placeholderTextColor="#9CA3AF"
-                            keyboardType="numeric"
-                            value={formData.stepGoal}
-                            onChangeText={(value: string) => handleInputChange('stepGoal', value)}
-                        />
-                        {errors.steps && <Text className="text-[11px] text-red-600 mt-1">{errors.steps}</Text>}
                     </View>
 
                     {/* Action Buttons */}

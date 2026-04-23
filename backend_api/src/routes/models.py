@@ -12,4 +12,3 @@ class UserSignUpRequest(BaseModel):
     heightIn: int
     gender: str
     activityLevel: str
-    targetsteps: int

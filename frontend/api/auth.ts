@@ -11,11 +11,10 @@ export const AuthService = {
 
     signup: async(
         username: string, email: string, password: string, 
-        age: string, weight: string, heightFT: string, heightIn: string, gender: string, 
-        activityLevel: string, stepGoal: string
+        age: string, weight: string, heightFT: string, heightIn: string, gender: string, activityLevel: string
     ) => {
         const response = await client.post(`/auth/signup`, {
-            username, email, password, age, weight, heightFT, heightIn, gender, activityLevel, "targetsteps": stepGoal
+            username, email, password, age, weight, heightFT, heightIn, gender, activityLevel
         })
 
         return response.data
