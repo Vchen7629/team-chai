@@ -3,6 +3,7 @@ from datetime import datetime
 from datetime import timedelta
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
+from core.logging import logger
 
 
 async def create_new_user_session(
@@ -31,6 +32,8 @@ async def create_new_user_session(
         },
     )
 
+    logger.debug("created new session in user_sessions table")
+
 
 async def fetch_username_with_session(
     db_session: AsyncSession, session_token: str
@@ -48,4 +51,5 @@ async def fetch_username_with_session(
     if not row:
         raise ValueError("Session doesnt exist or expired")
 
+    logger.debug("fetched username with session token from user_sessions db table")
     return row[0]

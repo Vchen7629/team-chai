@@ -1,6 +1,7 @@
 from datetime import date
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
+from core.logging import logger
 
 
 async def create_user_new_steps(
@@ -22,6 +23,8 @@ async def create_user_new_steps(
 
     await session.execute(text(query), {"username": username.strip(), "steps": steps})
 
+    logger.debug("created new steps record for the user in user_daily_steps db table")
+
 
 async def update_user_steps(session: AsyncSession, username: str, steps: int) -> None:
     """
@@ -39,6 +42,8 @@ async def update_user_steps(session: AsyncSession, username: str, steps: int) ->
     """
 
     await session.execute(text(query), {"username": username, "steps": steps})
+
+    logger.debug("updated steps record for the user in user_daily_steps db table")
 
 
 async def fetch_curr_date_steps(
@@ -63,4 +68,7 @@ async def fetch_curr_date_steps(
     if not row:
         raise ValueError("No steps found for username")
 
+    logger.debug(
+        "fetched steps for the user for the curr date from user_daily_steps db table"
+    )
     return row[0]

@@ -1,6 +1,7 @@
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from routes.models import UserSignUpRequest
+from core.logging import logger
 import bcrypt
 
 
@@ -17,6 +18,7 @@ async def fetch_hashed_password(session: AsyncSession, username: str) -> str:
     if not row:
         raise ValueError("No user account found for the username")
 
+    logger.debug("fetched hashed password for user from user_login db table")
     return row[0]
 
 
@@ -41,12 +43,13 @@ async def create_new_user_account(
     )
     if user_login_result.fetchone() is None:
         raise ValueError("Username already taken")
+    logger.debug("created new user account in user_login db table")
 
     user_profile_query = """
         INSERT INTO user_profile 
-        (username, email, age, weight, heightin, gender, activitylevel, targetsteps)
+        (username, email, age, weight, heightin, gender, activitylevel)
         VALUES
-        (:username, :email, :age, :weight, :heightin, :gender, :activitylevel, :targetsteps)
+        (:username, :email, :age, :weight, :heightin, :gender, :activitylevel)
         ON CONFLICT (username) DO NOTHING
     """
 
@@ -63,6 +66,7 @@ async def create_new_user_account(
             "heightin": heightin_conversion,
             "gender": user_data.gender,
             "activitylevel": user_data.activityLevel,
-            "targetsteps": user_data.targetsteps,
         },
     )
+
+    logger.debug("created new user in user_profile db table")

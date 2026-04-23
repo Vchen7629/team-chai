@@ -21,6 +21,7 @@ def configure_logging() -> None:
 
     structlog.configure(processors=processors)
 
+
 logger: structlog.stdlib.BoundLogger = structlog.get_logger().bind(service="api")
 
 configure_logging()
