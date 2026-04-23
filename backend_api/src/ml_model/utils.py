@@ -18,10 +18,8 @@ def load_model() -> XGBRegressor:
 
 def target_steps_recommendation(model: XGBRegressor, user_data: UserFitnessData) -> int:
     """Use the model on user fitness data and return a recommended daily step goal"""
-    height_inches = user_data.heightFT * 12 + user_data.heightIn
-
     BMI_IMPERIAL_CONSTANT = 703.0
-    bmi = (user_data.weight / height_inches**2) * BMI_IMPERIAL_CONSTANT
+    bmi = (user_data.weight / user_data.heightin**2) * BMI_IMPERIAL_CONSTANT
 
     GENDER_ENCODING = {"male": 0, "female": 1, "other": 2, "prefer_not_to_say": 3}
     gender = GENDER_ENCODING[user_data.gender.lower()]
@@ -39,7 +37,7 @@ def target_steps_recommendation(model: XGBRegressor, user_data: UserFitnessData)
         [
             [
                 user_data.age,
-                height_inches,
+                user_data.heightin,
                 user_data.weight,
                 bmi,
                 gender,
