@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from core.logging import logger
 from core.lifespan import lifespan
 from core.settings import settings
 from routes.auth import router as auth_router
@@ -31,5 +32,5 @@ app.include_router(auth_router)
 app.include_router(steps_router)
 
 if __name__ == "__main__":
-    print(f"starting fastapi on http:localhost:{settings.FASTAPI_PORT}")
+    logger.info("starting fastapi api", url=f"http:localhost:{settings.FASTAPI_PORT}")
     uvicorn.run(app, host="0.0.0.0", port=settings.FASTAPI_PORT)
