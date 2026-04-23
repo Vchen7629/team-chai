@@ -27,6 +27,7 @@ share/python-wheels/
 MANIFEST
 frontend/android/
 .vscode
+ml_model/dataset_output
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
