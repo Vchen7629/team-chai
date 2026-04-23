@@ -1,16 +1,22 @@
-from db.session_queries import fetch_username_with_session
+from routes.models import UserFitnessData
 from datetime import date
+from typing import Literal
 from fastapi import status
+from fastapi import Request
 from fastapi import Depends
 from fastapi import APIRouter
 from fastapi import HTTPException
+from pydantic import Field
 from pydantic import BaseModel
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+from core.logging import logger
 from db.connection import get_short_lived_session
 from db.steps_queries import update_user_steps
 from db.steps_queries import create_user_new_steps
 from db.steps_queries import fetch_curr_date_steps
+from ml_model.utils import target_steps_recommendation
+from db.session_queries import fetch_username_with_session
 
 
 router = APIRouter(prefix="/steps")
@@ -80,7 +86,7 @@ class FetchUserStepsRequest(BaseModel):
     date: date
 
 
-@router.post(path="/get", status_code=status.HTTP_200_OK)
+@router.post(path="/get_user", status_code=status.HTTP_200_OK)
 async def fetch_user_steps(
     request: FetchUserStepsRequest,
     db_session: AsyncSession = Depends(get_short_lived_session),
@@ -111,3 +117,15 @@ async def _get_authenticated_user(db_session: AsyncSession, session_token: str) 
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="server error"
         )
+
+
+@router.post(path="/get_recommended", status_code=status.HTTP_200_OK)
+async def get_recommended_steps(request: Request, user_data: UserFitnessData) -> int:
+    """Use the ml model with  user fitness data to recommend target steps"""
+    try:
+        model = request.app.state.ml_model
+
+        return target_steps_recommendation(model, user_data)
+    except Exception as e:
+        logger.error("error running target steps inference", err=str(e))
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
