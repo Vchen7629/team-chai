@@ -252,3 +252,4 @@ yarn-error.*
 /ios
 /android
 
+.idea
