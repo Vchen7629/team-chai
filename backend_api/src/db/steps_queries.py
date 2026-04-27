@@ -8,8 +8,7 @@ async def create_user_new_steps(
     session: AsyncSession, username: str, steps: int
 ) -> None:
     """
-    creates new steps for a user for a given date. used when the user first
-    inputs their current steps
+    creates new steps for a user for a given date. used when the user signs up
     """
     if steps <= 0:
         raise ValueError("steps must be positive")
