@@ -7,14 +7,13 @@ import { CalendarList } from 'react-native-calendars';
 import { Picker } from '@react-native-picker/picker'; //<- wheel for setting note time
 import AsyncStorage from '@react-native-async-storage/async-storage'; //<-saving/loading notes, stepGoal
 import useStepCounter from '../hooks/useStepCounter';
+import TargetStepsDisplay from "../components/targetStepsDisplay";
 
 type NavProp = NativeStackNavigationProp<RootStackParamList, 'UserFeed'>;
 
 const UserFeedScreen = () => {
-    const navigation = useNavigation<NavProp>();
-
     // calendar
-    const [selected, setSelected] = useState('');
+    const [selectedDate, setSelectedDate] = useState('');
 
     // notes
     const [modalVisible, setModalVisible] = useState(false);
@@ -25,14 +24,12 @@ const UserFeedScreen = () => {
     const [minute, setMinute] = useState('00');
     const [period, setPeriod] = useState('AM');
 
-    const [stepGoal, setStepGoal] = useState('');
     const {stepCount, isAvailable} = useStepCounter();
 
     const [username, setUsername] = useState('');
 
     useEffect(() => {
         loadReminders();
-        loadStepGoal();
     }, []);
 
     const loadReminders = async () => {
@@ -46,14 +43,14 @@ const UserFeedScreen = () => {
     };
 
     const saveReminder = async () => {
-        if(!selected || !note){
+        if(!selectedDate || !note){
             alert('Please select a date on the calendar and enter a note')
             return;
         }
         try {
             const newReminder = {
                 id: Date.now(),
-                date: selected,
+                date: selectedDate,
                 time: `${hour}:${minute} ${period}`,
                 note: note
             };
@@ -85,24 +82,6 @@ const UserFeedScreen = () => {
         }
     };
 
-    const saveStepGoal = async (value) => {
-        try {
-            await AsyncStorage.setItem('stepGoal', value);
-            setStepGoal(value);
-        } catch(e) {
-            console.error('Failed to save StepGoal', e);
-        }
-    };
-
-    const loadStepGoal = async () => {
-        try {
-            const stored = await AsyncStorage.getItem('stepGoal');
-            if(stored) setStepGoal(stored);
-        } catch (e) {
-            console.error('Failed to load stepGoal', e);
-        }
-    };
-
     return (
         <View className="flex-1 bg-blue-300">
             <Text className="p-3 text-xl font-bold"> HI User!</Text>
@@ -119,34 +98,16 @@ const UserFeedScreen = () => {
                        }
                    </View>
                 </View>
-                <View className="flex-1 border border-white/10 rounded-lg">
-                    <Text className="font-bold text-center p-3 bg-red-400 border-white/30 rounded-lg">Step Goal</Text>
-                    <View className="p-3">
-                        <TextInput
-                            value={stepGoal}
-                            onChangeText={(text) => setStepGoal(text.replace(/[^0-9]/g, ''))}
-                            placeholder="Step Goal..."
-                            placeholderTextColor='gray'
-                            keyboardType="numeric"
-                            returnKeyType="done"
-                            blurOnSubmit={true}
-                            onSubmitEditing={() => {
-                                saveStepGoal(stepGoal);
-                                Keyboard.dismiss();
-                            }}
-                            className="border border-white/40 rounded-xl font-bold p-3 justify-evenly text-center text-2xl"
-                        />
-                    </View>
-                </View>
+                <TargetStepsDisplay selectedDate={selectedDate}/>
             </View>
 
              <CalendarList
                 horizontal={true}
                 pagingEnabled={true}
                 calendarHeight={150}
-                onDayPress={(day) => setSelected(day.dateString)}
+                onDayPress={(day) => setSelectedDate(day.dateString)}
                 markedDates={{
-                    [selected]: {
+                    [selectedDate]: {
                         selected: true,
                         selectedDotColor: 'blue'
                     }
@@ -164,12 +125,12 @@ const UserFeedScreen = () => {
                 </View>
 
                 <ScrollView>
-                    { selected ? (
-                        reminders.filter(r => r.date === selected).length === 0 ? (
+                    { selectedDate ? (
+                        reminders.filter(r => r.date === selectedDate).length === 0 ? (
                             <Text className="text-center rounded-lg p-6 bg-yellow-200 font-light">No workouts logged for this day</Text>
                         ) : (
                             reminders
-                                .filter(r=> r.date === selected)
+                                .filter(r=> r.date === selectedDate)
                                 .map(reminder => (
                                 <View key={reminder.id} className="flex-row rounded-lg bg-yellow-200 p-4 mb-1">
                                     <Text className="w-18 p-2 font-medium">{reminder.time}:</Text>
@@ -199,7 +160,7 @@ const UserFeedScreen = () => {
                         </View>
                         <View className="bg-green-300 py-3 items-center ">
                             <Text className="font-medium">
-                                {selected ? new Date(selected + 'T00:00:00').toLocaleDateString('en-US', {
+                                {selectedDate ? new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', {
                                     weekday: 'long',
                                     month: 'long',
                                     day: 'numeric',
