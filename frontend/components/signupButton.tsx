@@ -3,6 +3,7 @@ import { AuthService } from "../api/auth";
 import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { NavProp } from "../screens/userSignUp";
+import { StepsService } from "../api/steps";
 
 const SignUpButton = ({ validateForm, formData, selectedGender, selectedActivity }: any) => {
     const navigation = useNavigation<NavProp>();
@@ -18,7 +19,13 @@ const SignUpButton = ({ validateForm, formData, selectedGender, selectedActivity
                 await AuthService.signup(
                     formData.name, formData.email, formData.password,
                     formData.age, formData.weight, formData.heightFt, formData.heightIn, 
-                    selectedGender, selectedActivity, formData.stepGoal
+                    selectedGender, selectedActivity
+                )
+
+                await StepsService.create_new_steps(
+                    formData.name,
+                    formData.age, formData.weight, formData.heightFt, formData.heightIn, 
+                    selectedGender, selectedActivity
                 )
 
                 Alert.alert('Success!', `Account created! Welcome, ${formData.name}!`);
