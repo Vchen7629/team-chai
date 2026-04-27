@@ -57,7 +57,7 @@ async def fetch_curr_date_steps(
     query = """
         SELECT steps FROM user_daily_steps
         WHERE LOWER(username) = LOWER(:username)
-            AND curr_date = CURRENT_DATE;
+            AND curr_date = :date;
     """
 
     result = await session.execute(
