@@ -1,3 +1,5 @@
+from pydantic import Field
+from typing import Literal
 from datetime import date
 from fastapi import status
 from fastapi import Request
@@ -19,24 +21,30 @@ from ml_model.utils import target_steps_recommendation
 
 router = APIRouter(prefix="/steps")
 
-
-class UserStepsRequest(BaseModel):
-    session_token: str
-    steps: int
-
+class NewUserStepsRequest(BaseModel):
+    username: str
+    user_data: UserFitnessData
 
 @router.post(path="/new", status_code=status.HTTP_201_CREATED)
 async def new_user_steps(
-    request: UserStepsRequest,
+    request: NewUserStepsRequest,
+    app_request: Request,
     db_session: AsyncSession = Depends(get_short_lived_session),
 ) -> dict[str, str]:
     """create new steps record for the user for the current day in the database"""
-    username = await get_authenticated_user(db_session, request.session_token)
+    try:
+        model = app_request.app.state.ml_model
+
+        steps = target_steps_recommendation(model, request.user_data)
+    except Exception as e:
+        logger.error("error running target steps inference", err=str(e))
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
     try:
-        await create_user_new_steps(db_session, username, request.steps)
+        await create_user_new_steps(db_session, request.username, steps)
 
-        return {"message": f"created {request.steps} steps successfully!"}
+        return {"message": f"created {steps} steps successfully!"}
     except ValueError as e:
         logger.error("error creating new steps for user", err=str(e))
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
@@ -55,9 +63,14 @@ async def new_user_steps(
         )
 
 
+class UpdateUserStepsRequest(BaseModel):
+    session_token: str
+    steps: int
+
+
 @router.post(path="/add", status_code=status.HTTP_200_OK)
 async def add_user_steps(
-    request: UserStepsRequest,
+    request: UpdateUserStepsRequest,
     db_session: AsyncSession = Depends(get_short_lived_session),
 ) -> dict[str, str]:
     """Add new steps to an existing user steps record for the current day in the database"""
