@@ -1,15 +1,11 @@
-import { Button, Text, View, TextInput, TouchableOpacity, ScrollView, Alert } from "react-native"
-import { useNavigation } from "@react-navigation/native"
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../App";
+import { Text, View, TextInput, TouchableOpacity, ScrollView, Alert } from "react-native"
 import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import SignUpButton from "../components/signupButton";
-
-export type NavProp = NativeStackNavigationProp<RootStackParamList, 'UserSignUp'>;
+import { SignUpButton } from "../components/screenAuthButtons";
+import { useNav } from "../context/navContext";
 
 const UserSignUpScreen = () => {
-    const navigation = useNavigation<NavProp>();
+    const { navigate } = useNav();
 
     // ===== FORM STATE =====
     const [formData, setFormData] = useState({
@@ -317,7 +313,7 @@ const UserSignUpScreen = () => {
                     
                     <TouchableOpacity
                         className="py-2 items-center mt-3"
-                        onPress={() => navigation.navigate('Home', undefined)}
+                        onPress={() => navigate('Home')}
                     >
                         <Text className="text-emerald-700 text-sm font-medium">Already have an account? Sign in</Text>
                     </TouchableOpacity>

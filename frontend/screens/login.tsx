@@ -1,15 +1,11 @@
 import { useState } from "react";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Pressable, Text, TextInput, View } from "react-native";
-import { RootStackParamList } from "../App";
-import { useNavigation } from "@react-navigation/native";
 import { User, Eye, EyeOff, Lock } from "lucide-react-native";
-import LoginButton from "../components/loginButton";
-
-export type NavProp = NativeStackNavigationProp<RootStackParamList, "Login">;
+import { LoginButton } from "../components/screenAuthButtons";
+import { useNav } from "../context/navContext";
 
 const LoginScreen = () => {
-    const navigation = useNavigation<NavProp>();
+    const { navigate } = useNav();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -22,7 +18,7 @@ const LoginScreen = () => {
                 <Text className="text-2xl font-bold text-gray-900 text-center mb-1">Welcome back</Text>
                 <View className="flex-row justify-center mb-4">
                     <Text className="text-sm text-gray-500">Don't have an account? </Text>
-                    <Pressable onPress={() => navigation.navigate('UserSignUp', undefined)}>
+                    <Pressable onPress={() => navigate('UserSignUp')}>
                         <Text className="text-sm text-blue-600 font-semibold">Sign up</Text>
                     </Pressable>
                 </View>

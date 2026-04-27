@@ -1,6 +1,3 @@
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../App";
 import { Text, TextInput, View, TouchableOpacity, ScrollView, Modal, Keyboard } from "react-native";
 import React, { useState, useEffect } from 'react';
 import { CalendarList } from 'react-native-calendars';
@@ -8,10 +5,10 @@ import { Picker } from '@react-native-picker/picker'; //<- wheel for setting not
 import AsyncStorage from '@react-native-async-storage/async-storage'; //<-saving/loading notes, stepGoal
 import useStepCounter from '../hooks/useStepCounter';
 import TargetStepsDisplay from "../components/targetStepsDisplay";
-
-type NavProp = NativeStackNavigationProp<RootStackParamList, 'UserFeed'>;
+import { useAuth } from "../context/authContext";
 
 const UserFeedScreen = () => {
+    const { loggedIn } = useAuth()
     // calendar
     const [selectedDate, setSelectedDate] = useState('');
 
@@ -25,8 +22,6 @@ const UserFeedScreen = () => {
     const [period, setPeriod] = useState('AM');
 
     const {stepCount, isAvailable} = useStepCounter();
-
-    const [username, setUsername] = useState('');
 
     useEffect(() => {
         loadReminders();
@@ -83,7 +78,15 @@ const UserFeedScreen = () => {
     };
 
     return (
-        <View className="flex-1 bg-blue-300">
+        <>
+        {!loggedIn && (
+            <View>
+                <Text>Please login to view the feed</Text>
+            </View>
+        )}
+        
+        {loggedIn && (
+            <View className="flex-1 bg-blue-300">
             <Text className="p-3 text-xl font-bold"> HI User!</Text>
 
             <View className="flex-row pb-1">
@@ -252,6 +255,9 @@ const UserFeedScreen = () => {
                 </View>
             </Modal>
         </View>
+        )}
+        </>
+        
     );
 
     // Idk if we should make a new screen when the user clicks on the day in the calendar on user feed screen
