@@ -14,7 +14,9 @@ export const AuthService = {
         age: string, weight: string, heightFT: string, heightIn: string, gender: string, activityLevel: string
     ) => {
         const response = await client.post(`/auth/signup`, {
-            username, email, password, age, weight, heightFT, heightIn, gender, activityLevel
+            username, email, password, age, weight, heightFT, heightIn, 
+            gender: gender.toLowerCase(), 
+            activityLevel: activityLevel.toLowerCase()
         })
 
         return response.data
