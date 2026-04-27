@@ -1,13 +1,9 @@
 import React, { useState } from "react";
 import { Text, View, TextInput, TouchableOpacity, ScrollView } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../App";
-
-type NavProp = NativeStackNavigationProp<RootStackParamList, 'UserSignUp'>;
+import { useNav } from "../context/navContext";
 
 const UserSignUpScreen = () => {
-    const navigation = useNavigation<NavProp>();
+    const { navigate } = useNav();
 
     // State to hold your form data
     const [form, setForm] = useState({
@@ -87,7 +83,7 @@ const UserSignUpScreen = () => {
                 {/* Continue Button */}
                 <View className="flex-1 justify-end items-end mt-10">
                     <TouchableOpacity 
-                        onPress={() => navigation.navigate('Home')}
+                        onPress={() => navigate('Home')}
                         className="bg-emerald-500 px-8 py-4 rounded-full"
                     >
                         <Text className="text-slate-900 font-bold text-lg">CONTINUE →</Text>
