@@ -5,13 +5,21 @@ interface StepProgressDisplayProps {
     stepGoal: number
     isAvailable: boolean
     isTracking: boolean
+    isInitializing: boolean
     onToggle: () => void
     showToggle: boolean
 }
 
-const StepProgressBar = ({ stepCount, stepGoal, isAvailable, isTracking, onToggle, showToggle }: StepProgressDisplayProps) => {
+const StepProgressBar = ({ stepCount, stepGoal, isAvailable, isTracking, isInitializing, onToggle, showToggle }: StepProgressDisplayProps) => {
     const progress = stepGoal > 0 ? Math.min(stepCount / stepGoal, 1) : 0
     const percent = Math.round(progress * 100)
+
+    const buttonText = () => {
+        if (isInitializing) return 'Starting...'
+        if (isTracking && !isAvailable) return 'Sensor unavailable'
+        
+        return isTracking ? 'Stop Tracking' : 'Start Tracking'
+    }
 
     return (
         <View className="mx-3 mb-2 bg-white/30 rounded-xl p-3">
@@ -22,9 +30,11 @@ const StepProgressBar = ({ stepCount, stepGoal, isAvailable, isTracking, onToggl
 
             <View className="flex-row items-center mb-2">
                 <Text className="text-2xl font-bold mr-2">
-                    {isAvailable ? stepCount : "-"}
+                    {isAvailable ? stepCount : 0}
                 </Text>
-                <Text className="text-sm text-gray-700">{isAvailable ? `${percent}%` : 'Sensor unavailable'}</Text>
+                <Text className="text-sm text-gray-700">
+                    {`${percent}%`}
+                </Text>
             </View>
 
             {/* Progress bar */}
@@ -40,9 +50,7 @@ const StepProgressBar = ({ stepCount, stepGoal, isAvailable, isTracking, onToggl
                     onPress={onToggle}
                     className={`rounded-full py-2 px-4 self-center ${isTracking ? 'bg-red-400' : 'bg-yellow-300'}`}
                 >
-                    <Text className="font-bold text-center">
-                        {isTracking ? 'Pause Tracking' : 'Start Tracking'}
-                    </Text>
+                    <Text className="font-bold text-center">{buttonText()}</Text>
                 </TouchableOpacity>
 
             )}

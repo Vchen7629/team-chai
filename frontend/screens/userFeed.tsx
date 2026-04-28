@@ -16,7 +16,7 @@ const UserFeedScreen = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
 
-    const { stepCount, isAvailable, isTracking, toggleTracking } = useStepCounter();
+    const { stepCount, isAvailable, isTracking, isInitializing, toggleTracking } = useStepCounter();
     const [stepGoal, setStepGoal] = useState(0);
     const [savedStepCount, setSavedStepCount] = useState(0);
 
@@ -50,6 +50,7 @@ const UserFeedScreen = () => {
                 stepGoal={stepGoal}
                 isAvailable={isAvailable}
                 isTracking={isTracking}
+                isInitializing={isInitializing}
                 onToggle={toggleTracking}
                 showToggle={isToday}
             />
