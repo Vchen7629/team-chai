@@ -17,5 +17,12 @@ export const UserService = {
         const response = await client.get(`/user/fitness/${session_token}`)
 
         return response.data
+    },
+
+    update_fitness_metrics: async() => {
+        const session_token = await SecureStore.getItemAsync('session_token')
+        const curr_date = new Date().toISOString().split('T')[0]
+
+        await client.patch("/user/fitness/update", { session_token, curr_date })
     }
 }

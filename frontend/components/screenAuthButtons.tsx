@@ -3,7 +3,6 @@ import { AuthService } from "../api/auth";
 import { useState } from "react";
 import { useAuth } from "../context/authContext";
 import { useNav } from "../context/navContext";
-import { LogOut } from "lucide-react-native";
 import { StepsService } from "../api/steps";
 
 interface LoginButtonProps {
@@ -86,11 +85,11 @@ const SignUpButton = ({ validateForm, formData, selectedGender, selectedActivity
 
                 const new_step_goal = await StepsService.create_new_step_goal(
                     formData.age, formData.weight, formData.heightFt, formData.heightIn,
-                    selectedGender, selectedActivity
+                    selectedGender, selectedActivity, 0.0, 0.0
                 )
 
-
-                await StepsService.create_new_user_steps(formData.name, new_step_goal)
+                const today = new Date().toISOString().split('T')[0]
+                await StepsService.add_new_step_goal(formData.name, new_step_goal, today)
 
                 Alert.alert('Success!', `Account created! Welcome, ${formData.name}!`);
 
