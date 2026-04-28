@@ -1,6 +1,6 @@
 import * as SecureStore from 'expo-secure-store'
 import client from './client'
-import { AccountDetailsRes, FitnessDetailRes } from '../components/profileDetailsComponents'
+import { AccountDetailsRes, FitnessDetailRes } from '../components/profileDetails'
 
 export const UserService = {
     fetch_account_details: async(): Promise<AccountDetailsRes> => {
