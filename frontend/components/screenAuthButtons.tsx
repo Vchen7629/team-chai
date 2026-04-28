@@ -84,11 +84,13 @@ const SignUpButton = ({ validateForm, formData, selectedGender, selectedActivity
                     selectedGender, selectedActivity
                 )
 
-                await StepsService.create_new_steps(
-                    formData.name,
+                const new_step_goal = await StepsService.create_new_step_goal(
                     formData.age, formData.weight, formData.heightFt, formData.heightIn,
                     selectedGender, selectedActivity
                 )
+
+
+                await StepsService.create_new_user_steps(formData.name, new_step_goal)
 
                 Alert.alert('Success!', `Account created! Welcome, ${formData.name}!`);
 
