@@ -2,7 +2,7 @@ from typing import Any
 from fastapi import FastAPI
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import AsyncSession
-from db.auth_queries import create_new_user_account
+from db.auth_queries import insert_new_user_account
 from routes.models import UserSignUpRequest
 import pytest
 
@@ -39,7 +39,7 @@ async def test_signup_returns_201(test_app: FastAPI) -> None:
 async def test_signup_returns_409_on_duplicate_username(
     test_app: FastAPI, db_session: AsyncSession
 ) -> None:
-    await create_new_user_account(
+    await insert_new_user_account(
         db_session, UserSignUpRequest(**make_signup_payload())
     )
 
@@ -55,7 +55,7 @@ async def test_signup_returns_409_on_duplicate_username(
 async def test_login_returns_200_with_session_token(
     test_app: FastAPI, db_session: AsyncSession
 ) -> None:
-    await create_new_user_account(
+    await insert_new_user_account(
         db_session, UserSignUpRequest(**make_signup_payload())
     )
 
@@ -87,7 +87,7 @@ async def test_login_returns_error_on_bad_credentials(
     test_app: FastAPI,
     db_session: AsyncSession,
 ) -> None:
-    await create_new_user_account(
+    await insert_new_user_account(
         db_session, UserSignUpRequest(**make_signup_payload())
     )
 
