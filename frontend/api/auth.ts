@@ -13,6 +13,10 @@ export const AuthService = {
         username: string, email: string, password: string, 
         age: string, weight: string, heightFT: string, heightIn: string, gender: string, activityLevel: string
     ) => {
+        if (activityLevel == "Very Active") {
+            activityLevel = "very_active"
+        }
+        
         const response = await client.post(`/auth/signup`, {
             username, email, password, age, weight, heightFT, heightIn, 
             gender: gender.toLowerCase(), 
