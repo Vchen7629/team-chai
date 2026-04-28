@@ -1,6 +1,5 @@
-from pydantic import Field
-from typing import Literal
 from datetime import date
+from datetime import datetime
 from fastapi import status
 from fastapi import Request
 from fastapi import Depends
@@ -65,6 +64,7 @@ async def new_user_steps(
 
 class UpdateUserStepsRequest(BaseModel):
     session_token: str
+    curr_date: datetime
     steps: int
 
 
@@ -77,7 +77,7 @@ async def add_user_steps(
     username = await fetch_authenticated_user(db_session, request.session_token)
 
     try:
-        await update_user_steps(db_session, username, request.steps)
+        await update_user_steps(db_session, username, request.steps, request.curr_date)
 
         return {"message": f"added {request.steps} steps successfully!"}
     except ValueError as e:

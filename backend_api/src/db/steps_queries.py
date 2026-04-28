@@ -1,12 +1,11 @@
+from datetime import datetime
 from datetime import date
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.logging import logger
 
 
-async def insert_user_new_steps(
-    session: AsyncSession, username: str, steps: int
-) -> None:
+async def insert_user_new_steps(session: AsyncSession, username: str, steps: int) -> None:
     """
     creates new steps for a user for a given date. used when the user signs up
     """
@@ -25,7 +24,7 @@ async def insert_user_new_steps(
     logger.debug("created new steps record for the user in user_daily_steps db table")
 
 
-async def update_user_steps(session: AsyncSession, username: str, steps: int) -> None:
+async def update_user_steps(session: AsyncSession, username: str, steps: int, date: datetime) -> None:
     """
     Add new steps for a user for a given date. Used for the background step
     tracker to increase daily steps
