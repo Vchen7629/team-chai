@@ -1,9 +1,10 @@
 import { Text, View } from "react-native";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CalendarList } from 'react-native-calendars';
 import useStepCounter from '../hooks/useStepCounter';
-import TargetStepsDisplay from "../components/targetStepsDisplay";
-import { WorkoutLogDisplay, WorkoutLogModal } from "../components/workoutLogComponents";
+import StepProgressBar from "../components/stepProgressBar";
+import { WorkoutLogDisplay, WorkoutLogModal } from "../components/workoutLog";
+import { StepsService } from "../api/steps";
 
 const today = new Date().toISOString().split('T')[0]
 
@@ -15,26 +16,33 @@ const UserFeedScreen = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
 
-    const {stepCount, isAvailable} = useStepCounter();
+    const { stepCount, isAvailable, isTracking, toggleTracking } = useStepCounter();
+    const [stepGoal, setStepGoal] = useState(0);
+
+    useEffect(() => {
+        if (!selectedDate) return;
+        async function loadStepGoal() {
+            try {
+                const goal = await StepsService.fetch_user_steps(selectedDate);
+                setStepGoal(goal);
+            } catch {
+                setStepGoal(0);
+            }
+        }
+        loadStepGoal();
+    }, [selectedDate]);
 
     return (
         <View className="flex-1 bg-blue-300 pt-12">
             <Text className="p-3 text-xl font-bold"> HI User!</Text>
 
-            <View className="flex-row pb-1">
-                <View className="flex-1">
-                    <Text className="font-bold text-center py-3 bg-yellow-300 rounded-lg">Current Steps</Text>
-                    <View className="p-6 justify-center">
-                        { isAvailable ? (
-                            <Text className=" text-2xl font-bold text-center">{stepCount}</Text>
-                            ) : (
-                            <Text className=" text-2xl font-bold text-center">Not available</Text>
-                            )
-                    }
-                </View>
-                </View>
-                <TargetStepsDisplay selectedDate={selectedDate}/>
-            </View>
+            <StepProgressBar
+                stepCount={stepCount}
+                stepGoal={stepGoal}
+                isAvailable={isAvailable}
+                isTracking={isTracking}
+                onToggle={toggleTracking}
+            />
 
             <CalendarList
                 horizontal={true}

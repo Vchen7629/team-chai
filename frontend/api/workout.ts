@@ -1,6 +1,6 @@
 import * as SecureStore from 'expo-secure-store'
 import client from './client'
-import { WorkoutLog } from '../components/workoutLogComponents'
+import { WorkoutLog } from '../components/workoutLog'
 
 export const WorkoutService = {
     create_new_workout_log: async(note: string, timestamp: string) => {

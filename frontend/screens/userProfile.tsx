@@ -1,5 +1,5 @@
 import { Text, View, ScrollView } from "react-native";
-import { AccountDetailsDisplay, FitnessDetailsDisplay } from "../components/profileDetailsComponents";
+import { AccountDetailsDisplay, FitnessDetailsDisplay } from "../components/profileDetails";
 
 const UserSignUpScreen = () => {
     return (
