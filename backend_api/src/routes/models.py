@@ -12,7 +12,7 @@ class UserSignUpRequest(BaseModel):
     age: int = Field(ge=13, le=70)
     weight: int = Field(gt=0)
     heightFT: int = Field(ge=4, le=7)
-    heightIn: int = Field(gt=0, le=12)
+    heightIn: int = Field(ge=0, le=12)
     gender: Literal["male", "female", "other", "prefer_not_to_say"]
     activityLevel: Literal["sedentary", "light", "moderate", "active", "very_active"]
 

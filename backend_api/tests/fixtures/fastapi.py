@@ -1,5 +1,6 @@
 from typing import Any
 from typing import AsyncGenerator
+from unittest.mock import MagicMock
 from fastapi import FastAPI
 from sqlalchemy.ext.asyncio import AsyncSession
 from routes.auth import router as auth_router
@@ -13,6 +14,7 @@ async def test_app(db_session: AsyncSession) -> FastAPI:
     test_app = FastAPI()
     test_app.include_router(auth_router)
     test_app.include_router(step_router)
+    test_app.state.ml_model = MagicMock()
 
     async def override_session() -> AsyncGenerator[Any, Any]:
         try:

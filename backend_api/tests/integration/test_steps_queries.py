@@ -1,18 +1,18 @@
-from datetime import datetime
+from datetime import date
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from tests.fixtures.db import seed_user
 from db.steps_queries import update_user_steps
-from db.steps_queries import fetch_curr_date_steps
-from db.steps_queries import create_user_new_steps
+from db.steps_queries import get_curr_date_steps
+from db.steps_queries import insert_user_new_steps
 import pytest
 
 
 @pytest.mark.asyncio
-async def test_create_user_new_steps_inserts_row(db_session: AsyncSession) -> None:
+async def test_insert_user_new_steps_inserts_row(db_session: AsyncSession) -> None:
     await seed_user(db_session)
 
-    await create_user_new_steps(db_session, "testuser", 500)
+    await insert_user_new_steps(db_session, "testuser", 500)
 
     row = (
         await db_session.execute(
@@ -24,13 +24,13 @@ async def test_create_user_new_steps_inserts_row(db_session: AsyncSession) -> No
 
 
 @pytest.mark.asyncio
-async def test_create_user_new_steps_replaces_on_same_date(
+async def test_insert_user_new_steps_replaces_on_same_date(
     db_session: AsyncSession,
 ) -> None:
     await seed_user(db_session)
-    await create_user_new_steps(db_session, "testuser", 100)
+    await insert_user_new_steps(db_session, "testuser", 100)
 
-    await create_user_new_steps(db_session, "testuser", 300)
+    await insert_user_new_steps(db_session, "testuser", 300)
 
     row = (
         await db_session.execute(
@@ -55,7 +55,7 @@ async def test_update_user_steps_increments_existing(
     initial_steps: int, added_steps: int, expected_total: int, db_session: AsyncSession
 ) -> None:
     await seed_user(db_session)
-    await create_user_new_steps(db_session, "testuser", initial_steps)
+    await insert_user_new_steps(db_session, "testuser", initial_steps)
 
     await update_user_steps(db_session, "testuser", added_steps)
 
@@ -70,13 +70,19 @@ async def test_update_user_steps_increments_existing(
 
 
 @pytest.mark.asyncio
-async def test_fetch_curr_date_steps_returns_correct_value(
+async def test_get_curr_date_steps_returns_correct_value(
     db_session: AsyncSession,
 ) -> None:
     await seed_user(db_session)
-    await create_user_new_steps(db_session, "testuser", 750)
+    await insert_user_new_steps(db_session, "testuser", 750)
 
-    result = await fetch_curr_date_steps(db_session, "testuser", datetime.now())
+    stored = (
+        await db_session.execute(
+            text("SELECT curr_date FROM user_daily_steps WHERE username = 'testuser'")
+        )
+    ).fetchone()
+
+    result = await get_curr_date_steps(db_session, "testuser", stored[0])
 
     assert result == 750
 
@@ -90,12 +96,12 @@ async def test_fetch_curr_date_steps_returns_correct_value(
         " testuser ",
     ],
 )
-async def test_create_user_new_steps_strips_whitespace(
+async def test_insert_user_new_steps_strips_whitespace(
     username_with_spaces: str, db_session: AsyncSession
 ) -> None:
     await seed_user(db_session)
 
-    await create_user_new_steps(db_session, username_with_spaces, 100)
+    await insert_user_new_steps(db_session, username_with_spaces, 100)
 
     row = (
         await db_session.execute(

@@ -5,20 +5,29 @@ from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from unittest.mock import patch
-from db.session_queries import create_new_user_session
+from db.session_queries import insert_new_user_session
 from tests.fixtures.db import seed_user
 import pytest
 
 SESSION_TOKEN = "test-session-token"
+
+USER_DATA = {
+    "age": 25,
+    "weight": 150,
+    "heightin": 70,
+    "gender": "male",
+    "activityLevel": "moderate",
+    "avg_steps_7_days": 5000.0,
+    "goal_hit_rate": 0.7,
+}
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "path,body",
     [
-        ("/steps/new", {"session_token": "invalid", "steps": 500}),
         ("/steps/add", {"session_token": "invalid", "steps": 100}),
-        ("/steps/get", {"session_token": "invalid", "date": "2026-04-22"}),
+        ("/steps/get_user", {"session_token": "invalid", "date": "2026-04-22"}),
     ],
 )
 async def test_all_steps_endpoints_return_401_on_invalid_session(
@@ -36,14 +45,14 @@ async def test_new_steps_returns_201(
     test_app: FastAPI, db_session: AsyncSession
 ) -> None:
     await seed_user(db_session)
-    await create_new_user_session(db_session, "testuser", SESSION_TOKEN)
 
-    async with AsyncClient(
-        transport=ASGITransport(app=test_app), base_url="http://test"
-    ) as client:
-        response = await client.post(
-            "/steps/new", json={"session_token": SESSION_TOKEN, "steps": 500}
-        )
+    with patch("routes.steps.target_steps_recommendation", return_value=500):
+        async with AsyncClient(
+            transport=ASGITransport(app=test_app), base_url="http://test"
+        ) as client:
+            response = await client.post(
+                "/steps/new", json={"username": "testuser", "user_data": USER_DATA}
+            )
 
     assert response.status_code == 201
     row = (
@@ -59,9 +68,9 @@ async def test_new_steps_returns_201(
 async def test_new_steps_returns_404_on_fk_violation(test_app: FastAPI) -> None:
     orig = Exception("insert or update on table violates foreign key constraint")
     with (
-        patch("routes.steps.fetch_username_with_session", return_value="ghost"),
+        patch("routes.steps.target_steps_recommendation", return_value=500),
         patch(
-            "routes.steps.create_user_new_steps",
+            "routes.steps.insert_user_new_steps",
             side_effect=IntegrityError("stmt", {}, orig),
         ),
     ):
@@ -69,7 +78,7 @@ async def test_new_steps_returns_404_on_fk_violation(test_app: FastAPI) -> None:
             transport=ASGITransport(app=test_app), base_url="http://test"
         ) as client:
             response = await client.post(
-                "/steps/new", json={"session_token": SESSION_TOKEN, "steps": 500}
+                "/steps/new", json={"username": "ghost", "user_data": USER_DATA}
             )
     assert response.status_code == 404
     assert response.json()["detail"] == "User not found"
@@ -80,7 +89,7 @@ async def test_add_steps_returns_200(
     test_app: FastAPI, db_session: AsyncSession
 ) -> None:
     await seed_user(db_session)
-    await create_new_user_session(db_session, "testuser", SESSION_TOKEN)
+    await insert_new_user_session(db_session, "testuser", SESSION_TOKEN)
 
     await db_session.execute(
         text(
@@ -111,19 +120,25 @@ async def test_get_steps_returns_correct_count(
     test_app: FastAPI, db_session: AsyncSession
 ) -> None:
     await seed_user(db_session)
-    await create_new_user_session(db_session, "testuser", SESSION_TOKEN)
+    await insert_new_user_session(db_session, "testuser", SESSION_TOKEN)
     await db_session.execute(
         text(
             "INSERT INTO user_daily_steps (username, steps, curr_date) VALUES ('testuser', 750, CURRENT_DATE)"
         )
     )
 
+    stored = (
+        await db_session.execute(
+            text("SELECT curr_date FROM user_daily_steps WHERE username = 'testuser'")
+        )
+    ).fetchone()
+
     async with AsyncClient(
         transport=ASGITransport(app=test_app), base_url="http://test"
     ) as client:
         response = await client.post(
-            "/steps/get",
-            json={"session_token": SESSION_TOKEN, "date": date.today().isoformat()},
+            "/steps/get_user",
+            json={"session_token": SESSION_TOKEN, "date": stored[0].isoformat()},
         )
 
     assert response.status_code == 200
@@ -135,13 +150,13 @@ async def test_get_steps_returns_404_when_no_steps(
     test_app: FastAPI, db_session: AsyncSession
 ) -> None:
     await seed_user(db_session)
-    await create_new_user_session(db_session, "testuser", SESSION_TOKEN)
+    await insert_new_user_session(db_session, "testuser", SESSION_TOKEN)
 
     async with AsyncClient(
         transport=ASGITransport(app=test_app), base_url="http://test"
     ) as client:
         response = await client.post(
-            "/steps/get",
+            "/steps/get_user",
             json={"session_token": SESSION_TOKEN, "date": date.today().isoformat()},
         )
 

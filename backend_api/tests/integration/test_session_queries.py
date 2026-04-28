@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from tests.fixtures.db import seed_user
-from db.session_queries import create_new_user_session, fetch_username_with_session
+from db.session_queries import insert_new_user_session, get_username_with_session
 
 
 @pytest.mark.asyncio
@@ -11,7 +11,7 @@ async def test_creates_session_with_correct_info(db_session: AsyncSession) -> No
     await seed_user(db_session, "user1")
 
     before = datetime.now(timezone.utc)
-    await create_new_user_session(db_session, "user1", "session-token-1")
+    await insert_new_user_session(db_session, "user1", "session-token-1")
     after = datetime.now(timezone.utc)
 
     row = (
@@ -33,10 +33,10 @@ async def test_updates_session_token_and_expiry_on_conflict(
     db_session: AsyncSession,
 ) -> None:
     await seed_user(db_session, "user1")
-    await create_new_user_session(db_session, "user1", "old-token")
+    await insert_new_user_session(db_session, "user1", "old-token")
 
     before = datetime.now(timezone.utc)
-    await create_new_user_session(db_session, "user1", "new-token")
+    await insert_new_user_session(db_session, "user1", "new-token")
     after = datetime.now(timezone.utc)
 
     row = (
@@ -57,9 +57,9 @@ async def test_fetch_username_returns_correct_username(
     db_session: AsyncSession,
 ) -> None:
     await seed_user(db_session, "user1")
-    await create_new_user_session(db_session, "user1", "valid-token")
+    await insert_new_user_session(db_session, "user1", "valid-token")
 
-    username = await fetch_username_with_session(db_session, "valid-token")
+    username = await get_username_with_session(db_session, "valid-token")
 
     assert username == "user1"
 
@@ -78,4 +78,4 @@ async def test_fetch_raises_when_session_not_found(
     )
 
     with pytest.raises(ValueError):
-        await fetch_username_with_session(db_session, token)
+        await get_username_with_session(db_session, token)
