@@ -6,9 +6,10 @@ interface StepProgressDisplayProps {
     isAvailable: boolean
     isTracking: boolean
     onToggle: () => void
+    showToggle: boolean
 }
 
-const StepProgressBar = ({ stepCount, stepGoal, isAvailable, isTracking, onToggle }: StepProgressDisplayProps) => {
+const StepProgressBar = ({ stepCount, stepGoal, isAvailable, isTracking, onToggle, showToggle }: StepProgressDisplayProps) => {
     const progress = stepGoal > 0 ? Math.min(stepCount / stepGoal, 1) : 0
     const percent = Math.round(progress * 100)
 
@@ -34,14 +35,17 @@ const StepProgressBar = ({ stepCount, stepGoal, isAvailable, isTracking, onToggl
                 />
             </View>
 
-            <TouchableOpacity
-                onPress={onToggle}
-                className={`rounded-full py-2 px-4 self-center ${isTracking ? 'bg-red-400' : 'bg-yellow-300'}`}
-            >
-                <Text className="font-bold text-center">
-                    {isTracking ? 'Pause Tracking' : 'Start Tracking'}
-                </Text>
-            </TouchableOpacity>
+            {showToggle && (
+                <TouchableOpacity
+                    onPress={onToggle}
+                    className={`rounded-full py-2 px-4 self-center ${isTracking ? 'bg-red-400' : 'bg-yellow-300'}`}
+                >
+                    <Text className="font-bold text-center">
+                        {isTracking ? 'Pause Tracking' : 'Start Tracking'}
+                    </Text>
+                </TouchableOpacity>
+
+            )}
         </View>
     )
 }
