@@ -36,18 +36,19 @@ async def new_target_steps_recommendation(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 
-class NewUserStepsRequest(BaseModel):
+class NewStepGoalRequest(BaseModel):
     username: str
     steps: int
+    curr_date: datetime
 
-@router.post(path="/add", status_code=status.HTTP_201_CREATED)
-async def add_user_steps(
-    request: NewUserStepsRequest,
+@router.post(path="/add/step_goal", status_code=status.HTTP_201_CREATED)
+async def add_new_step_goal(
+    request: NewStepGoalRequest,
     db_session: AsyncSession = Depends(get_short_lived_session),
 ) -> dict[str, str]:
     """create new steps record for the user for the current day in the database"""
     try:
-        await insert_user_new_step_goal(db_session, request.username, request.steps)
+        await insert_user_new_step_goal(db_session, request.username, request.steps, request.curr_date)
 
         return {"message": f"created {request.steps} steps successfully!"}
     except ValueError as e:
@@ -75,7 +76,7 @@ class UpdateUserStepsRequest(BaseModel):
 
 
 @router.post(path="/update", status_code=status.HTTP_200_OK)
-async def update_user_steps(
+async def update_curr_steps(
     request: UpdateUserStepsRequest,
     db_session: AsyncSession = Depends(get_short_lived_session),
 ) -> dict[str, str]:
