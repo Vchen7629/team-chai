@@ -26,12 +26,12 @@ const useStepCounter = () => {
                 start.setHours(0, 0, 0, 0);
                 const end = new Date();
 
-                const { steps } = await Pedometer.getStepCountAsync(start, end);
-                setStepCount(steps);
+                const { steps: baseline } = await Pedometer.getStepCountAsync(start, end);
+                setStepCount(baseline);
 
-                // Passively watch for new steps
+                // watchStepCount returns steps since subscription start, so add to baseline
                 subscriptionRef.current = Pedometer.watchStepCount(result => {
-                    setStepCount(result.steps);
+                    setStepCount(baseline + result.steps);
                 });
             }
         };
