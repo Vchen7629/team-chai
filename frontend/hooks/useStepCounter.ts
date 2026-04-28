@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { Pedometer } from 'expo-sensors';
+import { StepsService } from '../api/steps';
 
 const useStepCounter = () => {
     const [stepCount, setStepCount] = useState<number>(0);
     const [isAvailable, setIsAvailable] = useState<boolean>(false);
     const [isTracking, setIsTracking] = useState<boolean>(false);
     const subscriptionRef = useRef<any>(null);
+    const stepsGainedDelta = useRef<number>(0); // steps counted in between start and stop
 
     useEffect(() => {
         const subscribe = async (): Promise<void> => {
@@ -14,6 +16,17 @@ const useStepCounter = () => {
                     subscriptionRef.current.remove()
                     subscriptionRef.current = null
                 }
+
+                // updating database after we stop tracking
+                if (stepsGainedDelta.current > 0) {
+                    try {
+                        await StepsService.update_user_steps(stepsGainedDelta.current)
+                    } catch (e) {
+                        console.error("failed to save steps", e)
+                    }
+                    stepsGainedDelta.current = 0
+                }
+
                 return
             }
             // Check if pedometer is available on this device
@@ -22,15 +35,20 @@ const useStepCounter = () => {
 
             if (available) {
                 // Get steps from midnight to now
-                const start = new Date();
-                start.setHours(0, 0, 0, 0);
-                const end = new Date();
+                const today = new Date().toISOString().split('T')[0]
+                let baseline = 0;
+                try {
+                    baseline = await StepsService.fetch_user_curr_steps(today)
+                } catch {
+                    baseline = 0
+                }
 
-                const { steps: baseline } = await Pedometer.getStepCountAsync(start, end);
                 setStepCount(baseline);
+                stepsGainedDelta.current = 0
 
                 // watchStepCount returns steps since subscription start, so add to baseline
                 subscriptionRef.current = Pedometer.watchStepCount(result => {
+                    stepsGainedDelta.current = result.steps
                     setStepCount(baseline + result.steps);
                 });
             }
@@ -49,7 +67,7 @@ const useStepCounter = () => {
 
     const toggleTracking = () => setIsTracking(prev => !prev);
 
-    return { stepCount, isAvailable, isTracking, toggleTracking};
+    return { stepCount, isAvailable, isTracking, toggleTracking };
 };
 
 export default useStepCounter;

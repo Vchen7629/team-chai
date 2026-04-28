@@ -18,18 +18,27 @@ const UserFeedScreen = () => {
 
     const { stepCount, isAvailable, isTracking, toggleTracking } = useStepCounter();
     const [stepGoal, setStepGoal] = useState(0);
+    const [savedStepCount, setSavedStepCount] = useState(0);
+
+    const isToday = selectedDate === today;
 
     useEffect(() => {
         if (!selectedDate) return;
-        async function loadStepGoal() {
+        async function loadDayData() {
             try {
-                const goal = await StepsService.fetch_user_steps(selectedDate);
+                const goal = await StepsService.fetch_user_step_goal(selectedDate);
                 setStepGoal(goal);
             } catch {
                 setStepGoal(0);
             }
+            try {
+                const saved = await StepsService.fetch_user_curr_steps(selectedDate);
+                setSavedStepCount(saved);
+            } catch {
+                setSavedStepCount(0);
+            }
         }
-        loadStepGoal();
+        loadDayData();
     }, [selectedDate]);
 
     return (
@@ -37,11 +46,12 @@ const UserFeedScreen = () => {
             <Text className="p-3 text-xl font-bold"> HI User!</Text>
 
             <StepProgressBar
-                stepCount={stepCount}
+                stepCount={isToday ? stepCount : savedStepCount}
                 stepGoal={stepGoal}
                 isAvailable={isAvailable}
                 isTracking={isTracking}
                 onToggle={toggleTracking}
+                showToggle={isToday}
             />
 
             <CalendarList
