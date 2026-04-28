@@ -1,18 +1,17 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Picker } from "@react-native-picker/picker"; //<- wheel for setting note time
-import { useState, Dispatch, SetStateAction } from "react";
+import { useState, Dispatch, SetStateAction, useEffect } from "react";
 import { View, Modal, Text, TextInput, Keyboard, TouchableOpacity, ScrollView } from "react-native";
-import { Reminder } from "../screens/userFeed";
+import { WorkoutService } from "../api/workout";
 
 interface WorkoutLogModalProps {
     modalVisible: boolean
     setModalVisible: Dispatch<SetStateAction<boolean>>
     selectedDate: string
-    reminders: Reminder[]
-    setReminders: Dispatch<SetStateAction<Reminder[]>>
+    onSave: () => void
 }
 
-const WorkoutLogModal = ({ modalVisible, setModalVisible, selectedDate, reminders, setReminders }: WorkoutLogModalProps) => {
+const WorkoutLogModal = ({ modalVisible, setModalVisible, selectedDate, onSave }: WorkoutLogModalProps) => {
     const [hour, setHour] = useState('12');
     const [minute, setMinute] = useState('00');
     const [period, setPeriod] = useState('AM');
@@ -20,28 +19,29 @@ const WorkoutLogModal = ({ modalVisible, setModalVisible, selectedDate, reminder
     // notes
     const [note, setNote] = useState('');
 
-    const saveReminder = async () => {
+    function toTimestamp() {
+        let h = parseInt(hour)
+
+        if (period === 'PM' && h !== 12) h += 12
+        if (period === 'AM' && h === 12) h = 0
+
+        return `${selectedDate}T${String(h).padStart(2, '0')}:${minute}:00`
+    }
+
+    async function addWorkout() {
         if(!selectedDate || !note){
             alert('Please select a date on the calendar and enter a note')
             return;
         }
         try {
-            const newReminder = {
-                id: Date.now(),
-                date: selectedDate,
-                time: `${hour}:${minute} ${period}`,
-                note: note
-            };
-            const updated = [...reminders, newReminder];
-
-            await AsyncStorage.setItem('reminders', JSON.stringify(updated));
-            setReminders(updated);
+            await WorkoutService.create_new_workout_log(note, toTimestamp())
 
             setNote('');
             setHour('12');
             setMinute('00');
             setPeriod('AM');
             setModalVisible(false);
+            onSave();
         }
         catch(e) {
             console.error('Failed to save reminder', e)
@@ -130,7 +130,7 @@ const WorkoutLogModal = ({ modalVisible, setModalVisible, selectedDate, reminder
                             placeholder="Enter note..."
                             placeholderTextColor='gray'
                             onSubmitEditing={() => {
-                                saveReminder();
+                                addWorkout();
                                 Keyboard.dismiss()
                             }}
                             className="border border-gray-300 rounded-xl p-3 text-base mt-3 justify-evenly"
@@ -145,7 +145,7 @@ const WorkoutLogModal = ({ modalVisible, setModalVisible, selectedDate, reminder
 
                             <TouchableOpacity
                                 className="bg-green-500 rounded-full w-15 p-2 justify-center"
-                                onPress={() => saveReminder()}
+                                onPress={() => addWorkout()}
                             >
                                 <Text className="font-semibold">Save</Text>
                             </TouchableOpacity>
@@ -160,21 +160,36 @@ const WorkoutLogModal = ({ modalVisible, setModalVisible, selectedDate, reminder
 interface WorkoutLogDisplayProps {
     selectedDate: string
     setModalVisible: Dispatch<SetStateAction<boolean>>
-    reminders: Reminder[]
-    setReminders: Dispatch<SetStateAction<Reminder[]>>
+    refreshKey: number
 }
 
-const WorkoutLogDisplay = ({ selectedDate, setModalVisible, reminders, setReminders }: WorkoutLogDisplayProps) => {
-    const deleteReminder = async (id: number) => {
+interface WorkoutLog {
+    id: number,
+    logged_at: string,
+    note: string
+}
+
+const WorkoutLogDisplay = ({ selectedDate, setModalVisible, refreshKey }: WorkoutLogDisplayProps) => {
+    const [workoutLogs, setWorkoutLogs] = useState<WorkoutLog[]>([])
+
+    async function deleteWorkout(id: number) {
         try {
-            const updated = reminders.filter(r => r.id !== id);
-            await AsyncStorage.setItem('reminders', JSON.stringify(updated));
-            setReminders(updated);
+            const updated = workoutLogs.filter(r => r.id !== id);
+            await WorkoutService.delete_workout_log(id)
+            setWorkoutLogs(updated);
         }
         catch (e) {
-            console.error('Failed to delete reminder', e)
+            console.error('Failed to delete workout log', e)
         }
     };
+
+    useEffect(() => {
+        async function fetchWorkoutLogs() {
+            const res = await WorkoutService.fetch_workout_logs(selectedDate)
+            setWorkoutLogs(res)
+        }
+        fetchWorkoutLogs()
+    }, [selectedDate, refreshKey])
 
     return (
         <View className=" h-screen bg-blue-300">
@@ -189,16 +204,18 @@ const WorkoutLogDisplay = ({ selectedDate, setModalVisible, reminders, setRemind
 
             <ScrollView>
                 { selectedDate ? (
-                    reminders.filter(r => r.date === selectedDate).length === 0 ? (
+                    workoutLogs.filter(r => r.logged_at.startsWith(selectedDate)).length === 0 ? (
                         <Text className="text-center rounded-lg p-6 bg-yellow-200 font-light">No workouts logged for this day</Text>
                     ) : (
-                        reminders
-                            .filter(r => r.date === selectedDate)
-                            .map(reminder => (
-                            <View key={reminder.id} className="flex-row rounded-lg bg-yellow-200 p-4 mb-1">
-                                <Text className="w-18 p-2 font-medium">{reminder.time}:</Text>
-                                <Text className="flex-1 justify-center p-2 "> {reminder.note}</Text>
-                                <TouchableOpacity onPress={() => deleteReminder(reminder.id)}>
+                        workoutLogs.filter(r => r.logged_at.startsWith(selectedDate)).map(log => (
+                            <View key={log.id} className="flex-row rounded-lg bg-yellow-200 p-4 mb-1">
+                                <Text className="w-18 p-2 font-medium">
+                                    {new Date(log.logged_at).toLocaleTimeString('en-US', { 
+                                        hour: 'numeric', minute: '2-digit', hour12: true 
+                                    })}:
+                                </Text>
+                                <Text className="flex-1 justify-center p-2 "> {log.note}</Text>
+                                <TouchableOpacity onPress={() => deleteWorkout(log.id)}>
                                     <Text className="bg-red-400 text-white w-10 p-2 rounded-xl text-center">×</Text>
                                 </TouchableOpacity>
                             </View>
@@ -212,4 +229,4 @@ const WorkoutLogDisplay = ({ selectedDate, setModalVisible, reminders, setRemind
     )
 }
 
-export { WorkoutLogModal, WorkoutLogDisplay}
+export { WorkoutLog, WorkoutLogModal, WorkoutLogDisplay}
