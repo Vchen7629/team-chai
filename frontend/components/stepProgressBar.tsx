@@ -1,4 +1,7 @@
-import { Text, TouchableOpacity, View } from "react-native";
+import { useEffect } from "react";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { StepsService } from "../api/steps";
+import { UserService } from "../api/user";
 
 interface StepProgressDisplayProps {
     stepCount: number
@@ -20,6 +23,41 @@ const StepProgressBar = ({ stepCount, stepGoal, isAvailable, isTracking, isIniti
         
         return isTracking ? 'Stop Tracking' : 'Start Tracking'
     }
+
+    async function newStepGoal() {
+        if (percent != 100) return
+
+        try {
+            await UserService.update_fitness_metrics()
+
+            const fitnessData = await UserService.fetch_fitness_data()
+
+            const newStepGoal = await StepsService.create_new_step_goal(
+                String(fitnessData.age), 
+                String(fitnessData.weight), 
+                String(Math.floor(fitnessData.heightin / 12)),
+                String(fitnessData.heightin % 12),
+                fitnessData.gender, 
+                fitnessData.activityLevel,
+                fitnessData.avg_steps_7_days,
+                fitnessData.goal_hit_rate
+            )
+
+            // adding the new step goal as a goal for tomorrow
+            const tomorrow = new Date()
+            tomorrow.setDate(tomorrow.getDate() + 1)
+            const nextDay = tomorrow.toISOString().split('T')[0]
+
+            await StepsService.add_new_step_goal("Jane", newStepGoal, nextDay)
+        } catch (err: any) {
+            const msg = err.response?.data?.detail ?? "Something went wrong";
+            Alert.alert('Error', msg)
+        }
+    }
+
+    useEffect(() => {
+        newStepGoal()
+    }, [percent])
 
     return (
         <View className="mx-3 mb-2 bg-white/30 rounded-xl p-3">

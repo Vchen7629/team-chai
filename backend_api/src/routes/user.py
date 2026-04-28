@@ -1,3 +1,5 @@
+from pydantic import Field
+from datetime import datetime
 from fastapi import Path
 from fastapi import status
 from fastapi import Depends
@@ -10,6 +12,7 @@ from routes.models import UserFitnessData
 from routes.steps import fetch_authenticated_user
 from db.user_queries import get_email
 from db.user_queries import get_fitness_data
+from db.user_queries import update_user_fitness_metrics
 from db.connection import get_short_lived_session
 
 router = APIRouter(prefix="/user")
@@ -65,3 +68,24 @@ async def fetch_user_fitness_data(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Server error fetching db",
         )
+
+class UpdateFitnessMetricsRequest(BaseModel):
+    session_token: str = Field(min_length=1)
+    curr_date: datetime
+
+@router.patch(path="/fitness/update")
+async def update_fitness_metrics(
+    request: UpdateFitnessMetricsRequest,
+    db_session: AsyncSession = Depends(get_short_lived_session),
+) -> None:
+    """
+    Updates the avg_steps_7_days and goal_hit_rate metrics 
+    required for the ml model to recommend new step goals
+    """
+    username = await fetch_authenticated_user(db_session, request.session_token)
+
+    try:
+        await update_user_fitness_metrics(db_session, username, request.curr_date)
+    except Exception as e:
+        logger.error("unknown error updating fitness metrics", err=str(e))
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
