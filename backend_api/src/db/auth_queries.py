@@ -5,7 +5,7 @@ from core.logging import logger
 import bcrypt
 
 
-async def fetch_hashed_password(session: AsyncSession, username: str) -> str:
+async def get_hashed_password(session: AsyncSession, username: str) -> str:
     """Fetch hashed password for the user account via username"""
     query = """
         SELECT hashed_password 
@@ -22,7 +22,7 @@ async def fetch_hashed_password(session: AsyncSession, username: str) -> str:
     return row[0]
 
 
-async def create_new_user_account(
+async def insert_new_user_account(
     session: AsyncSession, user_data: UserSignUpRequest
 ) -> None:
     """Create a new user account with the username and hashed password (bcrypt) in db"""

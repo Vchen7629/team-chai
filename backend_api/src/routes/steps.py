@@ -11,11 +11,11 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.logging import logger
 from routes.models import UserFitnessData
-from routes.auth import get_authenticated_user
+from routes.auth import fetch_authenticated_user
 from db.connection import get_short_lived_session
 from db.steps_queries import update_user_steps
-from db.steps_queries import create_user_new_steps
-from db.steps_queries import fetch_curr_date_steps
+from db.steps_queries import insert_user_new_steps
+from db.steps_queries import get_curr_date_steps
 from ml_model.utils import target_steps_recommendation
 
 
@@ -42,7 +42,7 @@ async def new_user_steps(
 
 
     try:
-        await create_user_new_steps(db_session, request.username, steps)
+        await insert_user_new_steps(db_session, request.username, steps)
 
         return {"message": f"created {steps} steps successfully!"}
     except ValueError as e:
@@ -74,7 +74,7 @@ async def add_user_steps(
     db_session: AsyncSession = Depends(get_short_lived_session),
 ) -> dict[str, str]:
     """Add new steps to an existing user steps record for the current day in the database"""
-    username = await get_authenticated_user(db_session, request.session_token)
+    username = await fetch_authenticated_user(db_session, request.session_token)
 
     try:
         await update_user_steps(db_session, username, request.steps)
@@ -109,10 +109,10 @@ async def fetch_user_steps(
     db_session: AsyncSession = Depends(get_short_lived_session),
 ) -> int:
     """Fetch the number of steps for a user for the current date"""
-    username = await get_authenticated_user(db_session, request.session_token)
+    username = await fetch_authenticated_user(db_session, request.session_token)
 
     try:
-        steps = await fetch_curr_date_steps(db_session, username, request.date)
+        steps = await get_curr_date_steps(db_session, username, request.date)
 
         return steps
     except ValueError as e:

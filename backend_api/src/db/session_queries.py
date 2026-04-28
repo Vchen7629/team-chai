@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.logging import logger
 
 
-async def create_new_user_session(
+async def insert_new_user_session(
     session: AsyncSession, username: str, session_token: str
 ) -> None:
     """
@@ -35,7 +35,7 @@ async def create_new_user_session(
     logger.debug("created new session in user_sessions table")
 
 
-async def fetch_username_with_session(
+async def get_username_with_session(
     db_session: AsyncSession, session_token: str
 ) -> str:
     """Use the session token to fetch username for subsequent queries"""
