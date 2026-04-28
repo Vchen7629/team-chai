@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.logging import logger
 
 
-async def create_user_new_steps(
+async def insert_user_new_steps(
     session: AsyncSession, username: str, steps: int
 ) -> None:
     """
@@ -45,7 +45,7 @@ async def update_user_steps(session: AsyncSession, username: str, steps: int) ->
     logger.debug("updated steps record for the user in user_daily_steps db table")
 
 
-async def fetch_curr_date_steps(
+async def get_curr_date_steps(
     session: AsyncSession, username: str, date: date
 ) -> int:
     """

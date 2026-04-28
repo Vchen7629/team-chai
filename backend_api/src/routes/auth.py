@@ -7,10 +7,10 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.logging import logger
 from routes.models import UserSignUpRequest
-from db.session_queries import create_new_user_session
-from db.session_queries import fetch_username_with_session
-from db.auth_queries import fetch_hashed_password
-from db.auth_queries import create_new_user_account
+from db.session_queries import insert_new_user_session
+from db.session_queries import get_username_with_session
+from db.auth_queries import get_hashed_password
+from db.auth_queries import insert_new_user_account
 from db.connection import get_short_lived_session
 import uuid
 import bcrypt
@@ -34,7 +34,7 @@ async def user_login(
 ) -> UserLoginResponse:
     """Login endpoint, checks if username and password are correct and returns a session token for user specific use"""
     try:
-        hashed_password = await fetch_hashed_password(db, request.username)
+        hashed_password = await get_hashed_password(db, request.username)
     except ValueError:
         logger.error("No user account found for the username")
         raise HTTPException(
@@ -56,7 +56,7 @@ async def user_login(
     session_token = str(uuid.uuid4())
 
     try:
-        await create_new_user_session(db, request.username, session_token)
+        await insert_new_user_session(db, request.username, session_token)
 
     except Exception as e:
         logger.error("unknown error creating new user session", err=str(e))
@@ -71,7 +71,7 @@ async def user_signup(
 ) -> dict[str, str]:
     """Signup endpoint, checks if the password for the username is correct and returns a success/error msg"""
     try:
-        await create_new_user_account(db, request)
+        await insert_new_user_account(db, request)
     except ValueError as e:
         logger.error("error creating new user account", err=str(e))
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
@@ -87,10 +87,10 @@ async def user_signup(
     return {"message": "successfully created new user!"}
 
 
-async def get_authenticated_user(db_session: AsyncSession, session_token: str) -> str:
+async def fetch_authenticated_user(db_session: AsyncSession, session_token: str) -> str:
     """Shared private function with username fetching + error handling"""
     try:
-        return await fetch_username_with_session(db_session, session_token)
+        return await get_username_with_session(db_session, session_token)
     except ValueError as e:
         logger.error("Session doesnt exist or expired", err=str(e))
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))

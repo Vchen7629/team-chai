@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.logging import logger
 from routes.models import UserFitnessData
 
-async def fetch_email(
+async def get_email(
     db_session: AsyncSession, username: str
 ) -> str:
     """Fetch email from db"""
@@ -22,7 +22,7 @@ async def fetch_email(
 
     return row[0]
 
-async def fetch_fitness_data(
+async def get_fitness_data(
     db_session: AsyncSession, username: str
 ) -> UserFitnessData:
     """Fetch fitness data from the db like weight, heightin, gender, etc"""

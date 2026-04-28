@@ -1,4 +1,5 @@
 # shared pydantic type model classes
+from datetime import datetime
 from typing import Literal
 from pydantic import Field
 from pydantic import BaseModel
@@ -24,3 +25,7 @@ class UserFitnessData(BaseModel):
     activityLevel: Literal["sedentary", "light", "moderate", "active", "very_active"]
     avg_steps_7_days: float = Field(ge=0)
     goal_hit_rate: float = Field(ge=0, le=1)
+
+class UserWorkoutLog(BaseModel):
+    logged_at: datetime
+    note: str = Field(min_length=1)
