@@ -23,9 +23,10 @@ CREATE TABLE IF NOT EXISTS user_profile (
 );
 
 CREATE TABLE IF NOT EXISTS user_daily_steps (
-    username  TEXT REFERENCES user_login(username),
-    steps     INTEGER DEFAULT 0,
-    curr_date DATE NOT NULL,
+    username     TEXT REFERENCES user_login(username),
+    curr_steps   INTEGER DEFAULT 0,
+    target_steps INTEGER DEFAULT 0,
+    curr_date    DATE NOT NULL,
 
     PRIMARY KEY (username, curr_date)
 );
