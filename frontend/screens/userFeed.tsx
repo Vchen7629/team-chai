@@ -1,17 +1,9 @@
 import { Text, View } from "react-native";
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { CalendarList } from 'react-native-calendars';
-import AsyncStorage from '@react-native-async-storage/async-storage'; //<-saving/loading notes, stepGoal
 import useStepCounter from '../hooks/useStepCounter';
 import TargetStepsDisplay from "../components/targetStepsDisplay";
 import { WorkoutLogDisplay, WorkoutLogModal } from "../components/workoutLogComponents";
-
-export interface Reminder {
-    id: number
-    date: string
-    time: string
-    note: string
-}
 
 const today = new Date().toISOString().split('T')[0]
 
@@ -21,23 +13,9 @@ const UserFeedScreen = () => {
 
     // notes
     const [modalVisible, setModalVisible] = useState(false);
-    const [reminders, setReminders] = useState<Reminder[]>([]);
+    const [refreshKey, setRefreshKey] = useState(0);
 
     const {stepCount, isAvailable} = useStepCounter();
-
-    useEffect(() => {
-        loadReminders();
-    }, []);
-
-    const loadReminders = async () => {
-        try {
-            const stored = await AsyncStorage.getItem('reminders');
-            if(stored) setReminders(JSON.parse(stored));
-        }
-        catch (e) {
-            console.error('Failed to load reminders...', e);
-        }
-    };
 
     return (
         <View className="flex-1 bg-blue-300 pt-12">
@@ -70,18 +48,16 @@ const UserFeedScreen = () => {
                     }
                 }}
             />
-            <WorkoutLogDisplay 
+            <WorkoutLogDisplay
                 selectedDate={selectedDate}
                 setModalVisible={setModalVisible}
-                reminders={reminders}
-                setReminders={setReminders}
+                refreshKey={refreshKey}
             />
-            <WorkoutLogModal 
+            <WorkoutLogModal
                 modalVisible={modalVisible}
                 setModalVisible={setModalVisible}
                 selectedDate={selectedDate}
-                reminders={reminders}
-                setReminders={setReminders}
+                onSave={() => setRefreshKey(k => k + 1)}
             />
         </View>
     );

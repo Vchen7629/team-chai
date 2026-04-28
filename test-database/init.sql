@@ -36,5 +36,5 @@ CREATE TABLE IF NOT EXISTS user_workout_logs (
     logged_at TIMESTAMP NOT NULL,
     note      TEXT NOT NULL,
 
-    PRIMARY KEY (username, logged_at)
+    UNIQUE (username, logged_at)
 );
