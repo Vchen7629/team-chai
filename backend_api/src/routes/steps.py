@@ -12,9 +12,10 @@ from core.logging import logger
 from routes.models import UserFitnessData
 from routes.auth import fetch_authenticated_user
 from db.connection import get_short_lived_session
-from db.steps_queries import update_user_steps
-from db.steps_queries import insert_user_new_steps
-from db.steps_queries import get_curr_date_steps
+from db.steps_queries import update_user_curr_steps
+from db.steps_queries import insert_user_new_step_goal
+from db.steps_queries import get_curr_steps_count
+from db.steps_queries import get_steps_goal_count
 from ml_model.utils import target_steps_recommendation
 
 
@@ -41,7 +42,7 @@ async def new_user_steps(
 
 
     try:
-        await insert_user_new_steps(db_session, request.username, steps)
+        await insert_user_new_step_goal(db_session, request.username, steps)
 
         return {"message": f"created {steps} steps successfully!"}
     except ValueError as e:
@@ -77,7 +78,7 @@ async def add_user_steps(
     username = await fetch_authenticated_user(db_session, request.session_token)
 
     try:
-        await update_user_steps(db_session, username, request.steps, request.curr_date)
+        await update_user_curr_steps(db_session, username, request.steps, request.curr_date)
 
         return {"message": f"added {request.steps} steps successfully!"}
     except ValueError as e:
@@ -103,8 +104,30 @@ class FetchUserStepsRequest(BaseModel):
     date: date
 
 
-@router.post(path="/get_user", status_code=status.HTTP_200_OK)
-async def fetch_user_steps(
+@router.post(path="/get_goal", status_code=status.HTTP_200_OK)
+async def fetch_user_step_goal(
+    request: FetchUserStepsRequest,
+    db_session: AsyncSession = Depends(get_short_lived_session),
+) -> int:
+    """Fetch the step goal for a user for the current date"""
+    username = await fetch_authenticated_user(db_session, request.session_token)
+
+    try:
+        steps = await get_steps_goal_count(db_session, username, request.date)
+
+        return steps
+    except ValueError as e:
+        logger.error("error fetching user step goal", err=str(e))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except Exception as e:
+        logger.error("unknown error fetching user step goal", err=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Server error fetching db",
+        )
+
+@router.post(path="/get_curr_steps", status_code=status.HTTP_200_OK)
+async def fetch_user_curr_steps(
     request: FetchUserStepsRequest,
     db_session: AsyncSession = Depends(get_short_lived_session),
 ) -> int:
@@ -112,7 +135,7 @@ async def fetch_user_steps(
     username = await fetch_authenticated_user(db_session, request.session_token)
 
     try:
-        steps = await get_curr_date_steps(db_session, username, request.date)
+        steps = await get_curr_steps_count(db_session, username, request.date)
 
         return steps
     except ValueError as e:
@@ -124,15 +147,3 @@ async def fetch_user_steps(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Server error fetching db",
         )
-
-
-@router.post(path="/get_recommended", status_code=status.HTTP_200_OK)
-async def get_recommended_steps(request: Request, user_data: UserFitnessData) -> int:
-    """Use the ml model with  user fitness data to recommend target steps"""
-    try:
-        model = request.app.state.ml_model
-
-        return target_steps_recommendation(model, user_data)
-    except Exception as e:
-        logger.error("error running target steps inference", err=str(e))
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
