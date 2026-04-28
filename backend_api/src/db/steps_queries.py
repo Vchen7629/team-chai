@@ -65,7 +65,7 @@ async def update_user_curr_steps(session: AsyncSession, username: str, curr_step
             curr_steps = user_daily_steps.curr_steps + EXCLUDED.curr_steps;
     """
 
-    await session.execute(text(query), {"username": username, "curr_steps": curr_steps})
+    await session.execute(text(query), {"username": username, "curr_steps": curr_steps, "date": date})
 
     logger.debug("updated curr_steps record for the user in user_daily_steps db table")
 
