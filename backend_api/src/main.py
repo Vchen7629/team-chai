@@ -8,6 +8,7 @@ from core.settings import settings
 from routes.auth import router as auth_router
 from routes.steps import router as steps_router
 from routes.user import router as user_router
+from routes.workout import router as workout_router
 import uvicorn
 
 app = FastAPI(lifespan=lifespan)
@@ -32,6 +33,7 @@ async def validation_exception_handler(
 app.include_router(auth_router)
 app.include_router(steps_router)
 app.include_router(user_router)
+app.include_router(workout_router)
 
 if __name__ == "__main__":
     logger.info("starting fastapi api", url=f"http:localhost:{settings.FASTAPI_PORT}")
