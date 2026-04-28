@@ -31,9 +31,10 @@ CREATE TABLE IF NOT EXISTS user_daily_steps (
 );
 
 CREATE TABLE IF NOT EXISTS user_workout_logs (
-    username  TEXT REFERENCES user_login(username);
+    id        SERIAL PRIMARY KEY,
+    username  TEXT REFERENCES user_login(username),
     logged_at TIMESTAMP NOT NULL,
-    note       TEXT NOT NULL,
+    note      TEXT NOT NULL,
 
     PRIMARY KEY (username, logged_at)
 );
