@@ -6,6 +6,7 @@ const useStepCounter = () => {
     const [stepCount, setStepCount] = useState<number>(0);
     const [isAvailable, setIsAvailable] = useState<boolean>(false);
     const [isTracking, setIsTracking] = useState<boolean>(false);
+    const [isInitializing, setIsInitializing] = useState<boolean>(false);
     const subscriptionRef = useRef<any>(null);
     const stepsGainedDelta = useRef<number>(0); // steps counted in between start and stop
 
@@ -30,8 +31,13 @@ const useStepCounter = () => {
                 return
             }
             // Check if pedometer is available on this device
+            setIsInitializing(true)
             const available = await Pedometer.isAvailableAsync();
+
             setIsAvailable(available);
+            await new Promise(resolve => setTimeout(resolve, 400)); // short delay to get rid of delay
+
+            setIsInitializing(false)
 
             if (available) {
                 // Get steps from midnight to now
@@ -67,7 +73,7 @@ const useStepCounter = () => {
 
     const toggleTracking = () => setIsTracking(prev => !prev);
 
-    return { stepCount, isAvailable, isTracking, toggleTracking };
+    return { stepCount, isAvailable, isTracking, isInitializing, toggleTracking };
 };
 
 export default useStepCounter;
