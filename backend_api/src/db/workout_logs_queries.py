@@ -28,7 +28,7 @@ async def get_workout_log(
 ) -> List[UserWorkoutLog]:
     """Fetch all workout logs for the current date for the user"""
     query = """
-        SELECT logged_at, note FROM user_workout_logs
+        SELECT id, logged_at, note FROM user_workout_logs
         WHERE LOWER(username) = LOWER(:username)
             AND DATE(logged_at) = DATE(:logged_at)
     """
@@ -42,3 +42,20 @@ async def get_workout_log(
     logger.debug("fetched workout logs from user_workout_logs db table")
 
     return [UserWorkoutLog.model_validate(dict(row._mapping)) for row in rows]
+
+async def remove_workout_log(db_session: AsyncSession, username: str, id: int) -> None:
+    """Remove the workout log with id from database"""
+    del_query = """
+        DELETE FROM user_workout_logs 
+        WHERE LOWER(username) = LOWER(:username)
+            AND id = :id
+    """ 
+    verify_query = """SELECT id FROM user_workout_logs WHERE id = :id"""
+
+    await db_session.execute(text(del_query), {"username": username, "id": id})
+    
+    verify = await db_session.execute(text(verify_query), {"id": id})
+    if verify.fetchone():
+        raise ValueError(f"Failed to delete workout log {id} for {username}")
+    
+    logger.debug("deleted workout log successfully", username=username, id=id)

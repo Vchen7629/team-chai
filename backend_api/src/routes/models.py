@@ -27,5 +27,6 @@ class UserFitnessData(BaseModel):
     goal_hit_rate: float = Field(ge=0, le=1)
 
 class UserWorkoutLog(BaseModel):
+    id: int
     logged_at: datetime
     note: str = Field(min_length=1)

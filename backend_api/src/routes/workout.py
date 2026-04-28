@@ -1,3 +1,4 @@
+from db.workout_logs_queries import remove_workout_log
 from typing import List
 from datetime import datetime
 from pydantic import Field
@@ -19,7 +20,7 @@ router = APIRouter(prefix='/workout_log')
 
 class AddNewWorkoutLogRequest(BaseModel):
     session_token: str = Field(min_length=4)
-    timestamp: datetime = Field(min_length=1)
+    timestamp: datetime
     note: str = Field(min_length=1)
 
 @router.post(path="/add", status_code=status.HTTP_201_CREATED)
@@ -39,9 +40,9 @@ async def add_new_workout_log(
 
 class FetchWorkoutLogRequest(BaseModel):
     session_token: str = Field(min_length=4)
-    date: datetime = Field(min_length=1)
+    date: datetime
 
-@router.post(path="")
+@router.post(path="/fetch")
 async def fetch_workout_log(
     request: FetchWorkoutLogRequest,
     db_session: AsyncSession = Depends(get_short_lived_session)
@@ -56,4 +57,27 @@ async def fetch_workout_log(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         logger.error("unknown error fetching all workout logs", err=str(e))
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class DeleteWorkoutlogRequest(BaseModel):
+    id: int = Field(gt=0)
+    session_token: str = Field(min_length=4)
+
+@router.delete("/delete")
+async def delete_workout_log(
+    request: DeleteWorkoutlogRequest,
+    db_session: AsyncSession = Depends(get_short_lived_session)
+) -> dict[str, str]:
+    """Delete the workout log for the user"""
+    username = await fetch_authenticated_user(db_session, request.session_token)
+
+    try:
+        await remove_workout_log(db_session, username, request.id)
+
+        return {"message": "successfully deleted the workout log"}
+    except ValueError as e:
+        logger.error("error deleting workout log", err=str(e))
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Exception as e:
+        logger.error("unknown error deleting the workout log", err=str(e))
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
