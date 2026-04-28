@@ -5,7 +5,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.logging import logger
 
 
-async def insert_user_new_step_goal(session: AsyncSession, username: str, target_steps: int) -> None:
+async def insert_user_new_step_goal(
+    session: AsyncSession, username: str, target_steps: int, curr_date: datetime
+) -> None:
     """
     creates new step goal for a user for a given date. used when the user signs up
     """
@@ -14,12 +16,15 @@ async def insert_user_new_step_goal(session: AsyncSession, username: str, target
 
     query = """
         INSERT INTO user_daily_steps (username, target_steps, curr_date) 
-        VALUES (:username, :target_steps, CURRENT_DATE)
+        VALUES (:username, :target_steps, :curr_date)
         ON CONFLICT (username, curr_date) DO UPDATE SET
             target_steps = EXCLUDED.target_steps;
     """
 
-    await session.execute(text(query), {"username": username.strip(), "target_steps": target_steps})
+    await session.execute(
+        text(query), 
+        {"username": username.strip(), "target_steps": target_steps, "curr_date": curr_date}
+    )
 
     logger.debug("created new target steps record for the user in user_daily_steps db table")
 
