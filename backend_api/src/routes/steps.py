@@ -21,30 +21,35 @@ from ml_model.utils import target_steps_recommendation
 
 router = APIRouter(prefix="/steps")
 
+@router.post(path="/new_target_steps")
+async def new_target_steps_recommendation(
+    request: UserFitnessData,
+    app_request: Request,
+) -> int:
+    """Generates new target step recommendations using the ML model"""
+    try:
+        model = app_request.app.state.ml_model
+
+        return target_steps_recommendation(model, request)
+    except Exception as e:
+        logger.error("error running target steps inference", err=str(e))
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
 class NewUserStepsRequest(BaseModel):
     username: str
-    user_data: UserFitnessData
+    steps: int
 
-@router.post(path="/new", status_code=status.HTTP_201_CREATED)
-async def new_user_steps(
+@router.post(path="/add", status_code=status.HTTP_201_CREATED)
+async def add_user_steps(
     request: NewUserStepsRequest,
-    app_request: Request,
     db_session: AsyncSession = Depends(get_short_lived_session),
 ) -> dict[str, str]:
     """create new steps record for the user for the current day in the database"""
     try:
-        model = app_request.app.state.ml_model
+        await insert_user_new_step_goal(db_session, request.username, request.steps)
 
-        steps = target_steps_recommendation(model, request.user_data)
-    except Exception as e:
-        logger.error("error running target steps inference", err=str(e))
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-    try:
-        await insert_user_new_step_goal(db_session, request.username, steps)
-
-        return {"message": f"created {steps} steps successfully!"}
+        return {"message": f"created {request.steps} steps successfully!"}
     except ValueError as e:
         logger.error("error creating new steps for user", err=str(e))
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
@@ -69,8 +74,8 @@ class UpdateUserStepsRequest(BaseModel):
     steps: int
 
 
-@router.post(path="/add", status_code=status.HTTP_200_OK)
-async def add_user_steps(
+@router.post(path="/update", status_code=status.HTTP_200_OK)
+async def update_user_steps(
     request: UpdateUserStepsRequest,
     db_session: AsyncSession = Depends(get_short_lived_session),
 ) -> dict[str, str]:
