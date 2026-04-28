@@ -29,3 +29,11 @@ CREATE TABLE IF NOT EXISTS user_daily_steps (
 
     PRIMARY KEY (username, curr_date)
 );
+
+CREATE TABLE IF NOT EXISTS user_workout_logs (
+    username  TEXT REFERENCES user_login(username);
+    logged_at TIMESTAMP NOT NULL,
+    note       TEXT NOT NULL,
+
+    PRIMARY KEY (username, logged_at)
+);
