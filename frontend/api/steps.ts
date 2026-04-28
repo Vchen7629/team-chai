@@ -4,7 +4,7 @@ import * as SecureStore from 'expo-secure-store'
 export const StepsService = {
     create_new_step_goal: async(
         age: string, weight: string, heightFT: string, heightIn: string, 
-        gender: string, activityLevel: string
+        gender: string, activityLevel: string, avg_steps_7_days: number, goal_hit_rate: number
     ): Promise<number> => {
         const heightin = parseInt(heightFT) * 12 + parseInt(heightIn)
 
@@ -18,15 +18,17 @@ export const StepsService = {
             heightin, 
             gender: gender.toLowerCase(), 
             activityLevel: activityLevel.toLowerCase(),
-            avg_steps_7_days: 0.0, 
-            goal_hit_rate: 0.0
+            avg_steps_7_days, 
+            goal_hit_rate
         })
 
         return stepGoalRes.data
     },
 
-    create_new_user_steps: async(username: string, stepGoal: number) => {
-        const response = await client.post(`/steps/add`, { username, steps: stepGoal })
+    add_new_step_goal: async(username: string, stepGoal: number, date: string) => {
+        const response = await client.post(`/steps/add/step_goal`, { 
+            username, steps: stepGoal, curr_date: date 
+        })
 
         return response.data
     },
