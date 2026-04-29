@@ -10,15 +10,15 @@ interface StepProgressDisplayProps {
     stepCount: number
     stepGoal: number
     sensorAvailable: boolean
+    sensorInitializing: boolean
     isTracking: boolean
-    isInitializing: boolean
     onToggle: () => void
     showToggle: boolean
     onStepsAdded?: () => void
 }
 
 const StepProgressBar = ({ 
-    stepCount, stepGoal, sensorAvailable, isTracking, isInitializing, 
+    stepCount, stepGoal, sensorAvailable, isTracking, sensorInitializing, 
     onToggle, showToggle, onStepsAdded 
 }: StepProgressDisplayProps) => {
     const progress = stepGoal > 0 ? Math.min(stepCount / stepGoal, 1) : 0
@@ -28,7 +28,7 @@ const StepProgressBar = ({
     
 
     const buttonText = () => {
-        if (isInitializing) return 'Starting...'
+        if (sensorInitializing) return 'Starting...'
         if (isTracking && !sensorAvailable) return 'Sensor unavailable'
         
         return isTracking ? 'Stop Tracking' : 'Start Tracking'
