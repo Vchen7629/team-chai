@@ -25,7 +25,6 @@ const UserSignUpScreen = () => {
     const [selectedActivity, setSelectedActivity] = useState<string>('');
     const [errors, setErrors] = useState<Record<string, string>>({});
 
-    console.log("idk", selectedActivity)
     // ===== SELECTION OPTIONS =====
     const genders: string[] = ['Male', 'Female', 'Other', 'Prefer not to say'];
     const activityLevels: string[] = ['Sedentary', 'Light', 'Moderate', 'Active', 'Very Active'];
