@@ -1,9 +1,10 @@
-import { useEffect } from "react";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Alert, Modal, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { StepsService } from "../api/steps";
 import { UserService } from "../api/user";
 import { generateTomorrowDate } from "../utils/datetime";
 import { useAuth } from "../context/authContext";
+import { Plus } from "lucide-react-native";
 
 interface StepProgressDisplayProps {
     stepCount: number
@@ -13,12 +14,18 @@ interface StepProgressDisplayProps {
     isInitializing: boolean
     onToggle: () => void
     showToggle: boolean
+    onStepsAdded?: () => void
 }
 
-const StepProgressBar = ({ stepCount, stepGoal, isAvailable, isTracking, isInitializing, onToggle, showToggle }: StepProgressDisplayProps) => {
+const StepProgressBar = ({ 
+    stepCount, stepGoal, isAvailable, isTracking, isInitializing, 
+    onToggle, showToggle, onStepsAdded 
+}: StepProgressDisplayProps) => {
     const progress = stepGoal > 0 ? Math.min(stepCount / stepGoal, 1) : 0
     const percent = Math.round(progress * 100)
     const { username } = useAuth()
+    const [modalVisible, setModalVisible] = useState<boolean>(false)
+    
 
     const buttonText = () => {
         if (isInitializing) return 'Starting...'
@@ -73,6 +80,9 @@ const StepProgressBar = ({ stepCount, stepGoal, isAvailable, isTracking, isIniti
                 <Text className="text-sm text-gray-700">
                     {`${percent}%`}
                 </Text>
+                {showToggle && (
+                    <AddStepsButton setModalVisible={setModalVisible}/>
+                )}
             </View>
 
             {/* Progress bar */}
@@ -92,7 +102,107 @@ const StepProgressBar = ({ stepCount, stepGoal, isAvailable, isTracking, isIniti
                 </TouchableOpacity>
 
             )}
+            <AddStepsModal modalVisible={modalVisible} setModalVisible={setModalVisible} onStepsAdded={onStepsAdded}/>
         </View>
+    )
+}
+
+// testing button — lets users manually add steps without physically walking
+const AddStepsButton = ({ setModalVisible }: { setModalVisible: (v: boolean) => void }) => {
+    return (
+        <TouchableOpacity
+            onPress={() => setModalVisible(true)}
+            className="rounded-full py-1 px-2 ml-2 self-center bg-blue-500 flex-row items-center"
+        >
+            <Plus size={16} color="white" />
+            <Text className="font-bold text-white text-xs ml-1">Add Steps</Text>
+        </TouchableOpacity>
+    )
+}
+
+const QUICK_AMOUNTS = [500, 1000, 2000, 5000]
+
+const AddStepsModal = ({ modalVisible, setModalVisible, onStepsAdded }: { modalVisible: boolean, setModalVisible: (v: boolean) => void, onStepsAdded?: () => void }) => {
+    const [input, setInput] = useState('')
+
+    function handleClose() {
+        setInput('')
+        setModalVisible(false)
+    }
+
+    async function handleAddSteps() {
+        const steps = parseInt(input)
+        if (!steps || steps <= 0) {
+            Alert.alert('Invalid', 'Please enter a valid step count')
+            return
+        }
+        try {
+            await StepsService.update_user_steps(steps)
+            setInput('')
+            setModalVisible(false)
+            onStepsAdded?.()
+        } catch (err: any) {
+            Alert.alert('Error', err.response?.data?.detail ?? 'Failed to add steps')
+        }
+    }
+
+    return (
+        <Modal
+            visible={modalVisible}
+            animationType="fade"
+            transparent={true}
+            onRequestClose={handleClose}
+        >
+            <View className="flex-1 justify-center items-center bg-black/50 px-8">
+                <View className="bg-white rounded-2xl overflow-hidden w-full">
+                    <View className="bg-blue-500 px-6 py-4">
+                        <Text className="text-white font-bold text-xl text-center">Add Steps</Text>
+                    </View>
+
+                    <View className="px-5 py-5">
+                        <Text className="text-gray-500 text-xs font-semibold uppercase tracking-wide mb-2">Quick Add</Text>
+                        <View className="flex-row gap-2 mb-5">
+                            {QUICK_AMOUNTS.map(amount => (
+                                <TouchableOpacity
+                                    key={amount}
+                                    onPress={() => setInput(String(amount))}
+                                    className={`flex-1 py-2 rounded-full border ${input === String(amount) ? 'bg-blue-500 border-blue-500' : 'bg-white border-blue-300'}`}
+                                >
+                                    <Text className={`text-center text-xs font-bold ${input === String(amount) ? 'text-white' : 'text-blue-500'}`}>
+                                        +{amount >= 1000 ? `${amount / 1000}k` : amount}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+
+                        <Text className="text-gray-500 text-xs font-semibold uppercase tracking-wide mb-2">Custom Amount</Text>
+                        <TextInput
+                            value={input}
+                            onChangeText={setInput}
+                            keyboardType="numeric"
+                            placeholder="Enter steps..."
+                            placeholderTextColor="#9ca3af"
+                            className="border border-gray-200 rounded-xl px-4 py-3 text-base text-center font-semibold mb-5 bg-gray-50"
+                        />
+
+                        <View className="flex-row gap-3">
+                            <TouchableOpacity
+                                onPress={handleClose}
+                                className="flex-1 bg-gray-100 rounded-full py-3"
+                            >
+                                <Text className="text-gray-600 font-bold text-center">Cancel</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={handleAddSteps}
+                                className="flex-1 bg-yellow-400 rounded-full py-3"
+                            >
+                                <Text className="font-bold text-center">Add Steps</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </View>
+        </Modal>
     )
 }
 
