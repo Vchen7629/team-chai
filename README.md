@@ -44,14 +44,14 @@ FastAPI (Python 3.13+)
 #### Option 1: uv (recommended)
 
 ```bash
-cd backend
+cd backend_api
 uv sync
 ```
 
 #### Option 2: pip
 
 ```bash
-cd backend
+cd backend_api
 python -m venv .venv
 ```
 
@@ -87,12 +87,12 @@ Press `a` to open on an Android emulator, or `w` for the web browser.
 
 uv:
 ```bash
-cd backend
+cd backend_api
 uv run fastapi dev main.py
 ```
 
 pip (with venv activated):
 ```bash
-cd backend
+cd backend_api
 fastapi dev main.py
 ```

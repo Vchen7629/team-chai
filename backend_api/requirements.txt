@@ -64,12 +64,19 @@ idna==3.11
     #   httpx
 jinja2==3.1.6
     # via fastapi
+joblib==1.5.3
+    # via scikit-learn
 markdown-it-py==4.0.0
     # via rich
 markupsafe==3.0.3
     # via jinja2
 mdurl==0.1.2
     # via markdown-it-py
+numpy==2.4.4
+    # via
+    #   scikit-learn
+    #   scipy
+    #   xgboost
 pydantic==2.12.5
     # via
     #   fastapi
@@ -104,6 +111,12 @@ rich-toolkit==0.19.7
     #   fastapi-cloud-cli
 rignore==0.7.6
     # via fastapi-cloud-cli
+scikit-learn==1.8.0
+    # via backend (pyproject.toml)
+scipy==1.17.1
+    # via
+    #   scikit-learn
+    #   xgboost
 sentry-sdk==2.57.0
     # via fastapi-cloud-cli
 shellingham==1.5.4
@@ -112,6 +125,10 @@ sqlalchemy==2.0.49
     # via backend (pyproject.toml)
 starlette==1.0.0
     # via fastapi
+structlog==25.5.0
+    # via backend (pyproject.toml)
+threadpoolctl==3.6.0
+    # via scikit-learn
 typer==0.24.1
     # via
     #   fastapi-cli
@@ -141,3 +158,5 @@ watchfiles==1.1.1
     # via uvicorn
 websockets==16.0
     # via uvicorn
+xgboost==3.2.0
+    # via backend (pyproject.toml)
