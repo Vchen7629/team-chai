@@ -26,6 +26,11 @@ const StepProgressBar = ({
     const { username } = useAuth()
     const [modalVisible, setModalVisible] = useState<boolean>(false)
     
+    const progressBarColor = () => {
+        if (percent <= 75) return 'bg-yellow-400';
+        if (75 < percent && percent <= 90) return 'bg-orange-400'
+        return 'bg-green-400'
+    }
 
     const buttonText = () => {
         if (sensorInitializing) return 'Starting...'
@@ -81,21 +86,23 @@ const StepProgressBar = ({
                 )}
             </View>
 
-            {/* Progress bar */}
-            <View className="h-4 bg-white/50 rounded-full overflow-hidden mb-3">
-                <View 
-                    className="h-4 bg-yellow-400 rounded-full"
-                    style={{ width: `${percent}%` }}
-                />
-            </View>
-
             {showToggle && (
-                <TouchableOpacity
-                    onPress={onToggle}
-                    className={`rounded-full py-2 px-4 self-center ${isTracking ? 'bg-red-400' : 'bg-yellow-300'}`}
-                >
-                    <Text className="font-bold text-center">{buttonText()}</Text>
-                </TouchableOpacity>
+                <>
+                    {/* Progress bar */}
+                    <View className="h-4 bg-white/50 rounded-full overflow-hidden mb-3">
+                        <View 
+                            className={`h-4 ${progressBarColor()} rounded-full`}
+                            style={{ width: `${percent}%` }}
+                        />
+                    </View>
+
+                    <TouchableOpacity
+                        onPress={onToggle}
+                        className={`rounded-full py-2 px-4 self-center ${isTracking ? 'bg-red-400' : 'bg-yellow-300'}`}
+                    >
+                        <Text className="font-bold text-center">{buttonText()}</Text>
+                    </TouchableOpacity>
+                </>
 
             )}
             <AddStepsModal modalVisible={modalVisible} setModalVisible={setModalVisible} onStepsAdded={onStepsAdded}/>

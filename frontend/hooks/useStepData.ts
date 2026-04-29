@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { StepsService } from "../api/steps";
+import { generateTodayDate } from "../utils/datetime";
+
+const today = generateTodayDate()
 
 const useStepData = (isTracking: boolean, sensorCount: number) => {
     const [stepGoal, setStepGoal] = useState(0);
@@ -7,7 +10,11 @@ const useStepData = (isTracking: boolean, sensorCount: number) => {
     const trackingBaseline = useRef(0);
 
     useEffect(() => {
-        if (isTracking) trackingBaseline.current = savedStepCount;
+        if (isTracking) {
+            trackingBaseline.current = savedStepCount;
+        } else {
+            loadStepData(today);
+        }
     }, [isTracking]);
 
     async function loadStepData(date: string) {
