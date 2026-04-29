@@ -19,7 +19,7 @@ const UserFeedScreen = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
 
-    const { sensorCount, sensorAvailable, isTracking, isInitializing, toggleTracking } = useStepCounter();
+    const { sensorCount, sensorAvailable, isTracking, sensorInitializing, toggleTracking } = useStepCounter();
     const { displayCount, stepGoal, loadStepData } = useStepData(isTracking, sensorCount);
 
     const isToday = selectedDate === today;
@@ -38,7 +38,7 @@ const UserFeedScreen = () => {
                 stepGoal={stepGoal}
                 sensorAvailable={sensorAvailable}
                 isTracking={isTracking}
-                isInitializing={isInitializing}
+                sensorInitializing={sensorInitializing}
                 onToggle={toggleTracking}
                 showToggle={isToday}
                 onStepsAdded={() => loadStepData(today)}

@@ -8,8 +8,8 @@ const today = generateTodayDate()
 const useStepCounter = () => {
     const [sensorCount, setSensorCount] = useState(0);
     const [sensorAvailable, setSensorAvailable] = useState(false);
+    const [sensorInitializing, setSensorInitializing] = useState(false);
     const [isTracking, setIsTracking] = useState(false);
-    const [isInitializing, setIsInitializing] = useState(false);
     const subscriptionRef = useRef<any>(null);
     const sensorDelta = useRef(0);
 
@@ -28,13 +28,14 @@ const useStepCounter = () => {
     }
 
     async function startTracking() {
-        setIsInitializing(true);
+        setSensorInitializing(true);
         const available = await Pedometer.isAvailableAsync();
-        setSensorAvailable(available);
-        await new Promise(resolve => setTimeout(resolve, 400));
-        setIsInitializing(false);
 
         if (!available) return;
+
+        setSensorAvailable(available);
+        await new Promise(resolve => setTimeout(resolve, 400));
+        setSensorInitializing(false);
 
         const baseline = await StepsService.fetch_user_curr_steps(today);
         setSensorCount(baseline);
@@ -64,7 +65,7 @@ const useStepCounter = () => {
 
     const toggleTracking = () => setIsTracking(prev => !prev);
 
-    return { sensorCount, sensorAvailable, isTracking, isInitializing, toggleTracking };
+    return { sensorCount, sensorAvailable, sensorInitializing, isTracking, toggleTracking };
 };
 
 export default useStepCounter;
