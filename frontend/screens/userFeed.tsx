@@ -6,10 +6,12 @@ import StepProgressBar from "../components/stepProgressBar";
 import { WorkoutLogDisplay, WorkoutLogModal } from "../components/workoutLog";
 import { StepsService } from "../api/steps";
 import { generateTodayDate } from "../utils/datetime";
+import { useAuth } from "../context/authContext";
 
 const today = generateTodayDate()
 
 const UserFeedScreen = () => {
+    const { username } = useAuth()
     // calendar
     const [selectedDate, setSelectedDate] = useState(today);
 
@@ -44,7 +46,7 @@ const UserFeedScreen = () => {
 
     return (
         <View className="flex-1 bg-blue-300 pt-12">
-            <Text className="p-3 text-xl font-bold"> HI User!</Text>
+            <Text className="p-3 text-xl font-bold"> HI {username}!</Text>
 
             <StepProgressBar
                 stepCount={isToday ? stepCount : savedStepCount}

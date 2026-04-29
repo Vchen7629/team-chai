@@ -1,4 +1,5 @@
 import { Alert, Pressable, Text, TouchableOpacity } from "react-native"
+import * as SecureStore from 'expo-secure-store'
 import { AuthService } from "../api/auth";
 import { useState } from "react";
 import { useAuth } from "../context/authContext";
@@ -16,7 +17,7 @@ interface LoginButtonProps {
 const LoginButton = ({ username, password, setErrors }: LoginButtonProps) => {
     const { navigate } = useNav();
     const [isLoading, setIsLoading] = useState<boolean>(false)
-    const { setLoggedIn } = useAuth()
+    const { setLoggedIn, setUsername } = useAuth()
 
     function validateInput(): boolean {
         const newErrors = { username: "", password: "", general: "" }
@@ -40,7 +41,10 @@ const LoginButton = ({ username, password, setErrors }: LoginButtonProps) => {
 
         try {
             await AuthService.login(username, password)
+            await SecureStore.setItemAsync('username', username)
+            setUsername(username)
             setLoggedIn(true)
+            
             navigate("UserProfile")
         } catch (err: any) {
             const status = err.response?.status;

@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Picker } from "@react-native-picker/picker"; //<- wheel for setting note time
 import { useState, Dispatch, SetStateAction, useEffect } from "react";
 import { View, Modal, Text, TextInput, Keyboard, TouchableOpacity, ScrollView } from "react-native";

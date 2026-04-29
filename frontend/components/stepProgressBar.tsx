@@ -3,6 +3,7 @@ import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { StepsService } from "../api/steps";
 import { UserService } from "../api/user";
 import { generateTomorrowDate } from "../utils/datetime";
+import { useAuth } from "../context/authContext";
 
 interface StepProgressDisplayProps {
     stepCount: number
@@ -17,6 +18,7 @@ interface StepProgressDisplayProps {
 const StepProgressBar = ({ stepCount, stepGoal, isAvailable, isTracking, isInitializing, onToggle, showToggle }: StepProgressDisplayProps) => {
     const progress = stepGoal > 0 ? Math.min(stepCount / stepGoal, 1) : 0
     const percent = Math.round(progress * 100)
+    const { username } = useAuth()
 
     const buttonText = () => {
         if (isInitializing) return 'Starting...'
@@ -46,7 +48,7 @@ const StepProgressBar = ({ stepCount, stepGoal, isAvailable, isTracking, isIniti
 
             const nextDay = generateTomorrowDate()
 
-            await StepsService.add_new_step_goal("Jane", newStepGoal, nextDay)
+            await StepsService.add_new_step_goal(username, newStepGoal, nextDay)
         } catch (err: any) {
             const msg = err.response?.data?.detail ?? "Something went wrong";
             Alert.alert('Error', msg)

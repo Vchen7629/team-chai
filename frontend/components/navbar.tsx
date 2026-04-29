@@ -6,13 +6,15 @@ import { useAuth } from "../context/authContext"
 import { useNav, Screen } from "../context/navContext"
 
 const BottomNavbar = () => {
-    const { loggedIn, setLoggedIn } = useAuth()
+    const { loggedIn, setLoggedIn, setUsername } = useAuth()
     const { currentScreen, navigate } = useNav()
     const insets = useSafeAreaInsets()
 
     const handleLogout = async () => {
         await SecureStore.deleteItemAsync('session_token')
+        setUsername('')
         setLoggedIn(false)
+
         navigate('Home')
     }
 
