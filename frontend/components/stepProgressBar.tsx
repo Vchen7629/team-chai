@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { StepsService } from "../api/steps";
 import { UserService } from "../api/user";
+import { generateTomorrowDate } from "../utils/datetime";
 
 interface StepProgressDisplayProps {
     stepCount: number
@@ -43,10 +44,7 @@ const StepProgressBar = ({ stepCount, stepGoal, isAvailable, isTracking, isIniti
                 fitnessData.goal_hit_rate
             )
 
-            // adding the new step goal as a goal for tomorrow
-            const tomorrow = new Date()
-            tomorrow.setDate(tomorrow.getDate() + 1)
-            const nextDay = tomorrow.toISOString().split('T')[0]
+            const nextDay = generateTomorrowDate()
 
             await StepsService.add_new_step_goal("Jane", newStepGoal, nextDay)
         } catch (err: any) {

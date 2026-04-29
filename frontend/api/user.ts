@@ -1,6 +1,7 @@
 import * as SecureStore from 'expo-secure-store'
 import client from './client'
 import { AccountDetailsRes, FitnessDetailRes } from '../components/profileDetails'
+import { generateTodayDate } from '../utils/datetime'
 
 export const UserService = {
     fetch_account_details: async(): Promise<AccountDetailsRes> => {
@@ -21,7 +22,7 @@ export const UserService = {
 
     update_fitness_metrics: async() => {
         const session_token = await SecureStore.getItemAsync('session_token')
-        const curr_date = new Date().toISOString().split('T')[0]
+        const curr_date = generateTodayDate()
 
         await client.patch("/user/fitness/update", { session_token, curr_date })
     }

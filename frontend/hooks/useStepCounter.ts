@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Pedometer } from 'expo-sensors';
 import { StepsService } from '../api/steps';
+import { generateTodayDate } from '../utils/datetime';
 
 const useStepCounter = () => {
     const [stepCount, setStepCount] = useState<number>(0);
@@ -37,7 +38,7 @@ const useStepCounter = () => {
         if (!available) return
 
         // Get steps from midnight to now
-        const today = new Date().toISOString().split('T')[0]
+        const today = generateTodayDate()
         let baseline = 0;
         try {
             baseline = await StepsService.fetch_user_curr_steps(today)
