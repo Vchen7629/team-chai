@@ -1,12 +1,12 @@
 import { Text, View } from "react-native";
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { CalendarList } from 'react-native-calendars';
 import useStepCounter from '../hooks/useStepCounter';
 import StepProgressBar from "../components/stepProgressBar";
 import { WorkoutLogDisplay, WorkoutLogModal } from "../components/workoutLog";
-import { StepsService } from "../api/steps";
 import { generateTodayDate } from "../utils/datetime";
 import { useAuth } from "../context/authContext";
+import useStepData from "../hooks/useStepData";
 
 const today = generateTodayDate()
 
@@ -19,29 +19,14 @@ const UserFeedScreen = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
 
-    const { stepCount, isAvailable, isTracking, isInitializing, toggleTracking } = useStepCounter();
-    const [stepGoal, setStepGoal] = useState(0);
-    const [savedStepCount, setSavedStepCount] = useState(0);
+    const { sensorCount, isAvailable, isTracking, isInitializing, toggleTracking } = useStepCounter();
+    const { displayCount, stepGoal, loadStepData } = useStepData(isTracking, sensorCount);
 
     const isToday = selectedDate === today;
 
     useEffect(() => {
         if (!selectedDate) return;
-        async function loadDayData() {
-            try {
-                const goal = await StepsService.fetch_user_step_goal(selectedDate);
-                setStepGoal(goal);
-            } catch {
-                setStepGoal(0);
-            }
-            try {
-                const saved = await StepsService.fetch_user_curr_steps(selectedDate);
-                setSavedStepCount(saved);
-            } catch {
-                setSavedStepCount(0);
-            }
-        }
-        loadDayData();
+        loadStepData(selectedDate);
     }, [selectedDate]);
 
     return (
@@ -49,13 +34,14 @@ const UserFeedScreen = () => {
             <Text className="p-3 text-xl font-bold"> HI {username}!</Text>
 
             <StepProgressBar
-                stepCount={isToday ? stepCount : savedStepCount}
+                stepCount={displayCount}
                 stepGoal={stepGoal}
                 isAvailable={isAvailable}
                 isTracking={isTracking}
                 isInitializing={isInitializing}
                 onToggle={toggleTracking}
                 showToggle={isToday}
+                onStepsAdded={() => loadStepData(today)}
             />
 
             <CalendarList
