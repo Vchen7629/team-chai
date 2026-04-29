@@ -9,7 +9,7 @@ import { Plus } from "lucide-react-native";
 interface StepProgressDisplayProps {
     stepCount: number
     stepGoal: number
-    isAvailable: boolean
+    sensorAvailable: boolean
     isTracking: boolean
     isInitializing: boolean
     onToggle: () => void
@@ -18,7 +18,7 @@ interface StepProgressDisplayProps {
 }
 
 const StepProgressBar = ({ 
-    stepCount, stepGoal, isAvailable, isTracking, isInitializing, 
+    stepCount, stepGoal, sensorAvailable, isTracking, isInitializing, 
     onToggle, showToggle, onStepsAdded 
 }: StepProgressDisplayProps) => {
     const progress = stepGoal > 0 ? Math.min(stepCount / stepGoal, 1) : 0
@@ -29,7 +29,7 @@ const StepProgressBar = ({
 
     const buttonText = () => {
         if (isInitializing) return 'Starting...'
-        if (isTracking && !isAvailable) return 'Sensor unavailable'
+        if (isTracking && !sensorAvailable) return 'Sensor unavailable'
         
         return isTracking ? 'Stop Tracking' : 'Start Tracking'
     }
