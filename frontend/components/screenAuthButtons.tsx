@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useAuth } from "../context/authContext";
 import { useNav } from "../context/navContext";
 import { StepsService } from "../api/steps";
+import { generateTodayDate } from "../utils/datetime";
 
 interface LoginButtonProps {
     username: string
@@ -88,7 +89,7 @@ const SignUpButton = ({ validateForm, formData, selectedGender, selectedActivity
                     selectedGender, selectedActivity, 0.0, 0.0
                 )
 
-                const today = new Date().toISOString().split('T')[0]
+                const today = generateTodayDate()
                 await StepsService.add_new_step_goal(formData.name, new_step_goal, today)
 
                 Alert.alert('Success!', `Account created! Welcome, ${formData.name}!`);

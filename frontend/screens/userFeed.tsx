@@ -5,8 +5,9 @@ import useStepCounter from '../hooks/useStepCounter';
 import StepProgressBar from "../components/stepProgressBar";
 import { WorkoutLogDisplay, WorkoutLogModal } from "../components/workoutLog";
 import { StepsService } from "../api/steps";
+import { generateTodayDate } from "../utils/datetime";
 
-const today = new Date().toISOString().split('T')[0]
+const today = generateTodayDate()
 
 const UserFeedScreen = () => {
     // calendar
