@@ -38,7 +38,7 @@ export const StepsService = {
         const session_token = await SecureStore.getItemAsync('session_token')
         const today = generateTodayDate()
 
-        const response = await client.post(`/steps/add`, { session_token, steps, curr_date: today })
+        const response = await client.post(`/steps/update`, { session_token, steps, curr_date: today })
 
         return response.data
     },
