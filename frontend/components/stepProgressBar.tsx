@@ -74,12 +74,8 @@ const StepProgressBar = ({
             </View>
 
             <View className="flex-row items-center mb-2">
-                <Text className="text-2xl font-bold mr-2">
-                    {isAvailable ? stepCount : 0}
-                </Text>
-                <Text className="text-sm text-gray-700">
-                    {`${percent}%`}
-                </Text>
+                <Text className="text-2xl font-bold mr-2">{stepCount}</Text>
+                <Text className="text-sm text-gray-700">{`${percent}%`}</Text>
                 {showToggle && (
                     <AddStepsButton setModalVisible={setModalVisible}/>
                 )}
