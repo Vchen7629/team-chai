@@ -19,7 +19,7 @@ const UserFeedScreen = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
 
-    const { sensorCount, isAvailable, isTracking, isInitializing, toggleTracking } = useStepCounter();
+    const { sensorCount, sensorAvailable, isTracking, isInitializing, toggleTracking } = useStepCounter();
     const { displayCount, stepGoal, loadStepData } = useStepData(isTracking, sensorCount);
 
     const isToday = selectedDate === today;
@@ -36,7 +36,7 @@ const UserFeedScreen = () => {
             <StepProgressBar
                 stepCount={displayCount}
                 stepGoal={stepGoal}
-                isAvailable={isAvailable}
+                sensorAvailable={sensorAvailable}
                 isTracking={isTracking}
                 isInitializing={isInitializing}
                 onToggle={toggleTracking}
